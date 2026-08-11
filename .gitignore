@@ -16,6 +16,7 @@ backups/
 commercial.db
 data/
 secrets/
+dist_packages/
 *.pem
 !memoryguard/license_public_key.pem
 .env

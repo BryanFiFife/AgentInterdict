@@ -2,9 +2,11 @@
 
 # 🛡️ AgentInterdict
 
-### The local security gateway for AI-agent memory
+### Runtime enforcement for autonomous AI agents
 
-AgentInterdict sits between your agent and its long-term memory. It **binds authority to origin**, **blocks credential leakage**, **quarantines prompt-injection poisoning**, and **evaluates recalled memory at action time** — so your agent's memory can't be weaponised against it.
+**Trust context. Verify authority. Interdict unsafe action.**
+
+AgentInterdict sits at the runtime boundary of your autonomous agent. It **binds authority to origin**, **blocks credential leakage**, **quarantines prompt-injection poisoning**, and **revalidates every action before it executes** — so untrusted context can never become executable authority.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Commercial-blueviolet?style=for-the-badge)](LICENSE)
@@ -12,16 +14,28 @@ AgentInterdict sits between your agent and its long-term memory. It **binds auth
 [![CI](https://img.shields.io/github/actions/workflow/status/BryanFiFife/AgentInterdict/ci.yml?style=for-the-badge&label=CI&logo=github)](https://github.com/BryanFiFife/AgentInterdict/actions)
 [![Stars](https://img.shields.io/github/stars/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github&color=gold)](https://github.com/BryanFiFife/AgentInterdict)
 [![Forks](https://img.shields.io/github/forks/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github)](https://github.com/BryanFiFife/AgentInterdict)
+[![Tests](https://img.shields.io/badge/tests-78%20passing-2ea44f?style=for-the-badge)](#)
+[![LOC](https://img.shields.io/badge/core-2.7k%20LOC-4f8cff?style=for-the-badge)](#)
 
-**Free forever · Local-first · Fail-closed**
+**Local-first · Fail-closed · Transparent & auditable**
 
 </div>
 
 ---
 
-## ✨ Why AgentInterdict?
+## 🧠 The problem: your agent's memory is a weapon waiting to be aimed
 
-AI agents persist memory — and that memory is a **prime attack surface**. A single poisoned memory can make an agent leak secrets, ignore instructions, or take destructive actions. AgentInterdict is a **local, transparent gateway** that sits between your agent and its memory store and enforces six security invariants:
+Autonomous agents persist memory — and that memory is a **prime attack surface**. A single poisoned memory can make an agent leak secrets, ignore its system prompt, or take destructive actions, silently across every future session.
+
+The industry is racing to give agents *more* memory, *more* tools, and *more* autonomy. Almost nobody is securing the boundary where **context becomes action**. That's the gap AgentInterdict closes.
+
+> **The core insight:** *Retrieval is not permission. Reading a memory does not authorise acting on it.*
+
+---
+
+## ✨ What AgentInterdict does
+
+AgentInterdict is a **local, transparent runtime** that sits between your agent and its memory store and enforces six security invariants:
 
 | Invariant | What it means |
 |---|---|
@@ -32,7 +46,7 @@ AI agents persist memory — and that memory is a **prime attack surface**. A si
 | 🔑 **Credentials-not-memory** | Private keys, API tokens, JWTs and credential assignments are **rejected before persistence**. |
 | 🧱 **Fail-closed tampering** | Direct DB tampering is detected; runtime flips to `lockdown`. |
 
-> **Security claim:** AgentInterdict reduces and contains persistent-memory risk. It does not make prompt injection impossible and is not a substitute for host permissions, least-trust, sandboxing, or independent human approval for high-impact actions.
+**Honest scope:** AgentInterdict reduces and contains persistent-memory risk. It does not make prompt injection impossible and is not a substitute for host permissions, least-trust, sandboxing, or independent human approval for high-impact actions.
 
 ---
 
@@ -57,7 +71,7 @@ All packages are built from this repository. **One source, one download.**
 
 | Tier | Download | Threat feed | Remote features |
 |---|---|---|---|
-| **Community** · Free | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | Static (baked-in) | — |
+| **Community** | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | Static (baked-in) | — |
 | **Pro** · £79/mo | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ Advanced classifier, reputation feed |
 | **Business** · £349/mo | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + Policy packs, compliance packs, model hardening |
 | **Enterprise** · £1,500/mo | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + CVE advisory feed, anomaly detection, remote audit |
@@ -70,7 +84,7 @@ All packages are built from this repository. **One source, one download.**
 
 | Feature | Community | Pro | Business | Enterprise |
 |---|:---:|:---:|:---:|:---:|
-| Origin-bound local gateway | ✅ | ✅ | ✅ | ✅ |
+| Origin-bound local runtime | ✅ | ✅ | ✅ | ✅ |
 | Static transparent risk rules | ✅ | ✅ | ✅ | ✅ |
 | Single-operator GUI | ✅ | ✅ | ✅ | ✅ |
 | Local audit & integrity verification | ✅ | ✅ | ✅ | ✅ |
@@ -177,9 +191,9 @@ If poisoning or tampering is suspected:
 
 ## 🔒 Security posture
 
-- **No secrets in this repo.** The customer build ships only the public verification key. Vendor private signing keys, Stripe keys, and control-plane secrets live on the vendor's infrastructure — never in this repository.
 - **Fail-closed everywhere.** Tampering, invalid lineage, and lockdown all block by default.
 - **Privilege separation.** Operator vs. ordinary runtime API keys are distinct.
+- **Local by construction.** Your agent's context never leaves your machine. No cloud, no telemetry, no data exfiltration.
 
 ---
 
@@ -191,7 +205,7 @@ AgentInterdict is **free for Community use** and commercially licensed for Pro, 
 
 <div align="center">
 
-**Built with ❤️ for safer AI agents**
+**Built for safer autonomous agents**
 
 [⬇️ Download Community](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) · [⭐ Star this repo](https://github.com/BryanFiFife/AgentInterdict) · [🐛 Report an issue](https://github.com/BryanFiFife/AgentInterdict/issues)
 

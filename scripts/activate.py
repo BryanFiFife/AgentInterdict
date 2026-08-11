@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Activate/refresh a MemoryGuard paid lease from the vendor control plane."""
+"""Activate/refresh a AgentInterdict paid lease from the vendor control plane."""
 from __future__ import annotations
 
 import argparse
@@ -13,9 +13,9 @@ from pathlib import Path
 
 import httpx
 
-from memoryguard.licensing import verify_license_token
+from agentinterdict.licensing import verify_license_token
 
-HOME = Path.home() / ".memoryguard"
+HOME = Path.home() / ".agentinterdict"
 INSTALL_ID_FILE = HOME / "installation_id"
 LICENSE_FILE = HOME / "license.mglic"
 
@@ -42,18 +42,18 @@ def _atomic_write(path: Path, text: str) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Activate or refresh MemoryGuard")
+    ap = argparse.ArgumentParser(description="Activate or refresh AgentInterdict")
     ap.add_argument("--server", required=True, help="Vendor control-plane base URL (HTTPS required except localhost development)")
-    ap.add_argument("--license-key", help="Customer activation key (prefer prompt or MEMORYGUARD_ACTIVATION_KEY to avoid shell history)")
+    ap.add_argument("--license-key", help="Customer activation key (prefer prompt or AGENTINTERDICT_ACTIVATION_KEY to avoid shell history)")
     args = ap.parse_args()
 
     base = args.server.rstrip("/")
     if not (base.startswith("https://") or base.startswith("http://127.0.0.1") or base.startswith("http://localhost")):
         raise SystemExit("Refusing activation over insecure non-local HTTP")
-    license_key = args.license_key or os.getenv("MEMORYGUARD_ACTIVATION_KEY")
+    license_key = args.license_key or os.getenv("AGENTINTERDICT_ACTIVATION_KEY")
     if not license_key:
         try:
-            license_key = getpass.getpass("MemoryGuard activation key: ")
+            license_key = getpass.getpass("AgentInterdict activation key: ")
         except (EOFError, KeyboardInterrupt) as exc:
             raise SystemExit("Activation cancelled; no lease was changed") from exc
     license_key = license_key.strip()

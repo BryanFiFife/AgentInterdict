@@ -879,7 +879,7 @@ def action_check(*, action: str, action_risk: str = "medium", namespace: str = "
 
     if not mode["valid"] or mode["mode"] == "lockdown":
         allowed = False
-        reasons.append("MemoryGuard is in lockdown or runtime-mode integrity is invalid")
+        reasons.append("AgentInterdict is in lockdown or runtime-mode integrity is invalid")
 
     now = datetime.now(timezone.utc)
     with db.connect(write=True) as con:

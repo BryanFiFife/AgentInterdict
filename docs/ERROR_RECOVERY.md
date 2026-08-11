@@ -1,10 +1,10 @@
-# Error handling and recovery — MemoryGuard v0.4
+# Error handling and recovery — AgentInterdict v0.4
 
-MemoryGuard separates operational failures so recovery does not silently weaken enforcement.
+AgentInterdict separates operational failures so recovery does not silently weaken enforcement.
 
 ## Port occupied
 
-If the port was not explicitly set, the installer selects a documented high-port fallback. If the user explicitly requested a port, MemoryGuard fails rather than killing the process already using it.
+If the port was not explicitly set, the installer selects a documented high-port fallback. If the user explicitly requested a port, AgentInterdict fails rather than killing the process already using it.
 
 ## Dependency installation failure
 
@@ -20,11 +20,11 @@ The database uses WAL, foreign keys, busy timeout and serialized in-process writ
 
 ## Wrong local signing secret
 
-The database is bound to the signing secret. An accidental `MEMORYGUARD_SECRET` change aborts startup/diagnostics rather than presenting a healthy-looking vault whose seals no longer verify. Restore the original secret from the protected deployment secret store; do not “fix” the DB by resealing unknown state.
+The database is bound to the signing secret. An accidental `AGENTINTERDICT_SECRET` change aborts startup/diagnostics rather than presenting a healthy-looking vault whose seals no longer verify. Restore the original secret from the protected deployment secret store; do not “fix” the DB by resealing unknown state.
 
 ## Migration failure
 
-Before migrating an existing database, MemoryGuard creates a timestamped pre-migration backup. Migration runs transactionally and aborts on failure rather than resetting state.
+Before migrating an existing database, AgentInterdict creates a timestamped pre-migration backup. Migration runs transactionally and aborts on failure rather than resetting state.
 
 ## Secret material detected
 
@@ -36,7 +36,7 @@ Malformed new expiry timestamps are rejected at validation. Old/tampered malform
 
 ## Duplicate/retried writes
 
-Use `idempotency_key`. Repeating the same key/payload returns the existing item; reusing a key with altered semantics returns a conflict. Consequential external tools should also use sink-level idempotency because MemoryGuard's action check does not itself guarantee exactly-once external effects.
+Use `idempotency_key`. Repeating the same key/payload returns the existing item; reusing a key with altered semantics returns a conflict. Consequential external tools should also use sink-level idempotency because AgentInterdict's action check does not itself guarantee exactly-once external effects.
 
 ## Suspected poisoned memory
 

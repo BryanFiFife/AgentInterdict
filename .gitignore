@@ -6,9 +6,9 @@ __pycache__/
 *.db-shm
 .pytest_cache/
 .env
-.memoryguard-secret
-.memoryguard-operator-key
-.memoryguard-port
+.agentinterdict-secret
+.agentinterdict-operator-key
+.agentinterdict-port
 installation-result.json
 backups/
 *.log
@@ -18,5 +18,5 @@ data/
 secrets/
 dist_packages/
 *.pem
-!memoryguard/license_public_key.pem
+!agentinterdict/license_public_key.pem
 .env

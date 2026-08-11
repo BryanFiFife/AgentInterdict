@@ -191,7 +191,7 @@ def ensure_mcp(vp: Path) -> tuple[bool, str | None]:
     if result.returncode == 0 and can_import(vp, ["mcp"]):
         return True, None
     return False, (
-        "MCP v2 dependency could not be installed; core MemoryGuard remains usable through "
+        "MCP v2 dependency could not be installed; core AgentInterdict remains usable through "
         "Hermes/OpenClaw/REST/CLI integrations."
     )
 
@@ -221,11 +221,11 @@ def ensure_local_key(filename: str, label: str) -> str:
 
 
 def ensure_secret() -> str:
-    return ensure_local_key(".memoryguard-secret", "signing secret")
+    return ensure_local_key(".agentinterdict-secret", "signing secret")
 
 
 def ensure_operator_key() -> str:
-    return ensure_local_key(".memoryguard-operator-key", "operator key")
+    return ensure_local_key(".agentinterdict-operator-key", "operator key")
 
 
 def choose_port(explicit: int | None) -> int:
@@ -238,11 +238,11 @@ def choose_port(explicit: int | None) -> int:
     for candidate in DEFAULT_PORTS:
         if port_available(candidate):
             return candidate
-    raise RuntimeError("no standard MemoryGuard fallback port is available; supply --port")
+    raise RuntimeError("no standard AgentInterdict fallback port is available; supply --port")
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Install and verify MemoryGuard from a single extracted folder")
+    ap = argparse.ArgumentParser(description="Install and verify AgentInterdict from a single extracted folder")
     ap.add_argument("--port", type=int)
     ap.add_argument("--with-mcp", action="store_true", help="Attempt to install the optional MCP v2 integration")
     ap.add_argument("--require-mcp", action="store_true", help="Fail installation if MCP v2 cannot be installed")
@@ -265,15 +265,15 @@ def main() -> int:
     secret = ensure_secret()
     operator_key = ensure_operator_key()
     port = choose_port(args.port)
-    atomic_write_text(ROOT / ".memoryguard-port", str(port), mode=0o600)
+    atomic_write_text(ROOT / ".agentinterdict-port", str(port), mode=0o600)
     env = os.environ.copy()
     env.update(
         {
-            "MEMORYGUARD_SECRET": secret,
-            "MEMORYGUARD_OPERATOR_KEY": operator_key,
-            "MEMORYGUARD_DB": str(ROOT / "memoryguard.db"),
-            "MEMORYGUARD_PORT": str(port),
-            "MEMORYGUARD_HOST": "127.0.0.1",
+            "AGENTINTERDICT_SECRET": secret,
+            "AGENTINTERDICT_OPERATOR_KEY": operator_key,
+            "AGENTINTERDICT_DB": str(ROOT / "agentinterdict.db"),
+            "AGENTINTERDICT_PORT": str(port),
+            "AGENTINTERDICT_HOST": "127.0.0.1",
         }
     )
 
@@ -293,7 +293,7 @@ def main() -> int:
         "port": port,
         "mcp_dependencies": mcp_ok,
         "runtime_python": str(vp),
-        "operator_key_file": str(ROOT / ".memoryguard-operator-key"),
+        "operator_key_file": str(ROOT / ".agentinterdict-operator-key"),
         "tests_passed": tests_passed,
         "warnings": warnings,
         "platform": platform.platform(),
@@ -304,7 +304,7 @@ def main() -> int:
     if args.start:
         os.execve(
             str(vp),
-            [str(vp), "-m", "uvicorn", "memoryguard.app:app", "--host", "127.0.0.1", "--port", str(port)],
+            [str(vp), "-m", "uvicorn", "agentinterdict.app:app", "--host", "127.0.0.1", "--port", str(port)],
             env,
         )
     return 0

@@ -9,8 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from memoryguard import config, db, service
-from memoryguard.security import DEMO_SECRET, signing_secret_status
+from agentinterdict import config, db, service
+from agentinterdict.security import DEMO_SECRET, signing_secret_status
 
 
 def port_available(port: int) -> bool:
@@ -24,7 +24,7 @@ def port_available(port: int) -> bool:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="MemoryGuard diagnostics")
+    ap = argparse.ArgumentParser(description="AgentInterdict diagnostics")
     ap.add_argument("--startup", action="store_true", help="Run checks suitable immediately before server startup")
     args = ap.parse_args()
 
@@ -41,14 +41,14 @@ def main() -> int:
 
     secret_status = signing_secret_status()
     if not secret_status["usable"]:
-        failures.append("MEMORYGUARD_SECRET must be a non-demo random value of at least 32 bytes")
+        failures.append("AGENTINTERDICT_SECRET must be a non-demo random value of at least 32 bytes")
     api_key = config.api_key()
     if api_key and len(api_key.encode("utf-8")) < 32:
-        failures.append("MEMORYGUARD_API_KEY must be at least 32 bytes when configured")
+        failures.append("AGENTINTERDICT_API_KEY must be at least 32 bytes when configured")
     if len(config.operator_key().encode("utf-8")) < 32:
-        failures.append("MEMORYGUARD_OPERATOR_KEY must be at least 32 bytes")
+        failures.append("AGENTINTERDICT_OPERATOR_KEY must be at least 32 bytes")
     if config.is_remote_bind() and not api_key:
-        failures.append("remote bind requires MEMORYGUARD_API_KEY")
+        failures.append("remote bind requires AGENTINTERDICT_API_KEY")
     if args.startup and not port_available(config.port()):
         failures.append(f"port {config.port()} is already occupied")
 
@@ -60,7 +60,7 @@ def main() -> int:
     except Exception as exc:
         failures.append(f"integrity verification crashed: {exc}")
 
-    print(f"MemoryGuard doctor v{config.VERSION}")
+    print(f"AgentInterdict doctor v{config.VERSION}")
     print(f"database: {db.DB_PATH}")
     print(f"port: {config.port()}")
     for w in warnings:

@@ -3,11 +3,11 @@ from pathlib import Path
 import pytest
 
 TEST_DB = Path(__file__).parent / "test.db"
-os.environ["MEMORYGUARD_DB"] = str(TEST_DB)
-os.environ["MEMORYGUARD_SECRET"] = "test-secret-0123456789abcdef0123456789abcdef"
-os.environ["MEMORYGUARD_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_DB"] = str(TEST_DB)
+os.environ["AGENTINTERDICT_SECRET"] = "test-secret-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
 
-from memoryguard import db, service
+from agentinterdict import db, service
 
 @pytest.fixture(autouse=True)
 def fresh():
@@ -66,7 +66,7 @@ def test_signed_paid_license_verifies(tmp_path, monkeypatch):
     from datetime import datetime, timedelta, timezone
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
     from cryptography.hazmat.primitives import serialization
-    from memoryguard import licensing
+    from agentinterdict import licensing
 
     private = Ed25519PrivateKey.generate()
     public_path = tmp_path / "pub.pem"
@@ -82,8 +82,8 @@ def test_signed_paid_license_verifies(tmp_path, monkeypatch):
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     enc = lambda b: base64.urlsafe_b64encode(b).decode().rstrip("=")
     token = enc(raw) + "." + enc(private.sign(raw))
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_PUBLIC_KEY_FILE", str(public_path))
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_TOKEN", token)
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_PUBLIC_KEY_FILE", str(public_path))
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_TOKEN", token)
     status = licensing.get_license_status()
     assert status.valid is True
     assert status.plan == "pro"
@@ -95,7 +95,7 @@ def test_tampered_paid_license_falls_back_to_community(tmp_path, monkeypatch):
     from datetime import datetime, timedelta, timezone
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
     from cryptography.hazmat.primitives import serialization
-    from memoryguard import licensing
+    from agentinterdict import licensing
 
     private = Ed25519PrivateKey.generate()
     public_path = tmp_path / "pub.pem"
@@ -108,8 +108,8 @@ def test_tampered_paid_license_falls_back_to_community(tmp_path, monkeypatch):
     # Mutate payload without re-signing.
     bad_raw=raw.replace(b'"pro"',b'"enterprise"')
     bad_token=enc(bad_raw)+'.'+token.split('.',1)[1]
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_PUBLIC_KEY_FILE", str(public_path))
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_TOKEN", bad_token)
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_PUBLIC_KEY_FILE", str(public_path))
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_TOKEN", bad_token)
     status=licensing.get_license_status()
     assert status.valid is False
     assert status.plan == "community"

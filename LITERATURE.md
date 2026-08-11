@@ -1,8 +1,8 @@
-# MemoryGuard literature review — persistent AI-agent memory security
+# AgentInterdict literature review — persistent AI-agent memory security
 
 Last curated: 10 August 2026.
 
-This document is a practical research map for MemoryGuard v0.4. It summarises public research, standards activity and security guidance; it does not reproduce papers, certify those papers, or claim MemoryGuard implements every proposed defence. Preprints should be treated as research evidence, not standards.
+This document is a practical research map for AgentInterdict v0.4. It summarises public research, standards activity and security guidance; it does not reproduce papers, certify those papers, or claim AgentInterdict implements every proposed defence. Preprints should be treated as research evidence, not standards.
 
 ## 1. Why persistent memory is a distinct security problem
 
@@ -16,7 +16,7 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 2. **A Survey on Long-Term Memory Security in LLM Agents: Attacks, Defenses, and Governance Across the Memory Lifecycle** — arXiv:2604.16548  
    https://arxiv.org/abs/2604.16548  
-   Frames security across write, store, retrieve, execute, share/propagate and forget/rollback phases. This is directly relevant to MemoryGuard's lifecycle controls, containment and rollback.
+   Frames security across write, store, retrieve, execute, share/propagate and forget/rollback phases. This is directly relevant to AgentInterdict's lifecycle controls, containment and rollback.
 
 3. **Sleeper Memory Poisoning in LLM Agents** — arXiv:2605.15338  
    https://arxiv.org/abs/2605.15338  
@@ -24,7 +24,7 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 4. **The Misattribution Gap: When Memory Poisoning Looks Benign** — arXiv:2605.22842  
    https://arxiv.org/abs/2605.22842  
-   Examines harmful retrieval from benign-looking artifacts and the attribution problem. Relevant to MemoryGuard's rule that textual appearance never creates authority.
+   Examines harmful retrieval from benign-looking artifacts and the attribution problem. Relevant to AgentInterdict's rule that textual appearance never creates authority.
 
 5. **Hijacking Agent Memory: Stealthy Trojan Attacks Through Persistent State / Conversational Interaction** — arXiv:2605.29960  
    https://arxiv.org/abs/2605.29960  
@@ -36,7 +36,7 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 7. **Triggered Poisoning of Multimodal Memories in Web Agents** — arXiv:2606.10742  
    https://arxiv.org/abs/2606.10742  
-   Extends the threat beyond plain text. MemoryGuard v0.4 is still text/metadata-centric and therefore does not claim complete multimodal protection.
+   Extends the threat beyond plain text. AgentInterdict v0.4 is still text/metadata-centric and therefore does not claim complete multimodal protection.
 
 8. **When Agents Remember Too Much: Memory Poisoning Attacks on Large Language Model Agents** — arXiv:2607.06595  
    https://arxiv.org/abs/2607.06595  
@@ -48,7 +48,7 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 10. **MemPoison: Uncovering Persistent Memory Threats and Structural Blind Spots in LLM Agents** — arXiv:2607.14651  
     https://arxiv.org/abs/2607.14651  
-    Introduces L1 direct, L2 compositional multi-record and L3 context-triggered dormant corruption. Its central result for MemoryGuard is that write-time defenses can suppress direct attacks yet miss records that become harmful only when jointly retrieved or triggered. v0.4 therefore adds a retrieval/action-time firewall that rescans the combined context selected for an action.
+    Introduces L1 direct, L2 compositional multi-record and L3 context-triggered dormant corruption. Its central result for AgentInterdict is that write-time defenses can suppress direct attacks yet miss records that become harmful only when jointly retrieved or triggered. v0.4 therefore adds a retrieval/action-time firewall that rescans the combined context selected for an action.
 
 11. **MemSecBench: Tracking Agent Memory Poisoning from Injection to Impact** — arXiv:2607.27080  
     https://arxiv.org/abs/2607.27080  
@@ -58,11 +58,11 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 12. **MemLineage: Lineage-Guided Enforcement for LLM Agent Memory** — arXiv:2605.14421  
     https://arxiv.org/abs/2605.14421  
-    Treats memory security as chain-of-custody, attaching provenance/derivation lineage and gating sensitive actions that descend from external ancestry. MemoryGuard implements compact parent/root provenance and tamper-evident seals, but not MemLineage's full proposed construction.
+    Treats memory security as chain-of-custody, attaching provenance/derivation lineage and gating sensitive actions that descend from external ancestry. AgentInterdict implements compact parent/root provenance and tamper-evident seals, but not MemLineage's full proposed construction.
 
 13. **Securing LLM-Agent Long-Term Memory Against Poisoning: Non-Malleable, Origin-Bound Authority with Machine-Checked Guarantees** — arXiv:2606.24322  
     https://arxiv.org/abs/2606.24322  
-    Shows why content scoring and ordinary derivation history can be malleable under summarization, trusted-tool echoes and manufactured corroboration. It motivates MemoryGuard's core invariant: derivation may preserve or reduce authority, never amplify it, and machine-derived memories cannot become direct human authorization.
+    Shows why content scoring and ordinary derivation history can be malleable under summarization, trusted-tool echoes and manufactured corroboration. It motivates AgentInterdict's core invariant: derivation may preserve or reduce authority, never amplify it, and machine-derived memories cannot become direct human authorization.
 
 14. **Evidence Tracing and Execution Provenance in LLM Agents** — arXiv:2606.04990  
     https://arxiv.org/abs/2606.04990  
@@ -76,7 +76,7 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 16. **Beyond Single-Use Tokens: Durable Authorization State for Replay-Resistant LLM Agent Actions** — arXiv:2608.01710  
     https://arxiv.org/abs/2608.01710  
-    Identifies “semantic replay”: retries, replanning, delegation and crash recovery can exceed the intended execution budget even when token identifiers are single-use. It argues for canonical action binding and durable, monotonic authorization state. MemoryGuard v0.4 implements deterministic **action-scope binding** for high/critical approvals, but it does not yet implement a full Issue/Prepare/Commit consumption ledger; that remains an explicit production gap.
+    Identifies “semantic replay”: retries, replanning, delegation and crash recovery can exceed the intended execution budget even when token identifiers are single-use. It argues for canonical action binding and durable, monotonic authorization state. AgentInterdict v0.4 implements deterministic **action-scope binding** for high/critical approvals, but it does not yet implement a full Issue/Prepare/Commit consumption ledger; that remains an explicit production gap.
 
 17. **NIST/NCCoE — Accelerating the Adoption of Software and AI Agent Identity and Authorization (Concept Paper)**  
     https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization  
@@ -84,13 +84,13 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 18. **NIST — AI Agent Standards Initiative**  
     https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative  
-    NIST's 2026 initiative explicitly includes agent security and identity/authorization as areas for standards and research. MemoryGuard treats these as external ecosystem signals, not certification.
+    NIST's 2026 initiative explicitly includes agent security and identity/authorization as areas for standards and research. AgentInterdict treats these as external ecosystem signals, not certification.
 
 ## 4. Certified / robustness-oriented defenses
 
 19. **SMSR: Certified Defence Against Runtime Memory Poisoning in Persistent LLM Agent Systems** — arXiv:2606.12703  
     https://arxiv.org/abs/2606.12703  
-    Combines write-time HMAC provenance with randomized memory ablation and verdict voting. MemoryGuard v0.4 uses HMAC-backed local integrity controls but does not implement SMSR's certified retrieval procedure or claim certified robustness.
+    Combines write-time HMAC provenance with randomized memory ablation and verdict voting. AgentInterdict v0.4 uses HMAC-backed local integrity controls but does not implement SMSR's certified retrieval procedure or claim certified robustness.
 
 ## 5. Broader agent-security guidance and adjacent projects
 
@@ -100,11 +100,11 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 21. **OWASP AI Agent Security Cheat Sheet**  
     https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html  
-    Covers memory poisoning, excessive autonomy, least privilege, isolation, validation and monitoring. These are complementary to MemoryGuard's memory-specific boundary.
+    Covers memory poisoning, excessive autonomy, least privilege, isolation, validation and monitoring. These are complementary to AgentInterdict's memory-specific boundary.
 
 22. **OWASP LLM Prompt Injection Prevention Cheat Sheet**  
     https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html  
-    Useful for upstream injection defenses. MemoryGuard assumes upstream filters can fail and therefore applies persistent-state controls too.
+    Useful for upstream injection defenses. AgentInterdict assumes upstream filters can fail and therefore applies persistent-state controls too.
 
 23. **OWASP RAG Security Cheat Sheet**  
     https://cheatsheetseries.owasp.org/cheatsheets/RAG_Security_Cheat_Sheet.html  
@@ -112,11 +112,11 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 
 24. **OWASP Agent Memory Guard**  
     https://owasp.org/www-project-agent-memory-guard/  
-    An independent OWASP project focused on protecting agent memory from poisoning. It overlaps conceptually with this product in areas such as integrity, leakage detection, policy and rollback. **MemoryGuard v0.4 in this package is not affiliated with, endorsed by, or derived from the OWASP project.** The name overlap is a commercial naming/trademark-clearance issue that should be resolved before public launch.
+    An independent OWASP project focused on protecting agent memory from poisoning. It overlaps conceptually with this product in areas such as integrity, leakage detection, policy and rollback. **AgentInterdict v0.4 in this package is not affiliated with, endorsed by, or derived from the OWASP project.** The name overlap is a commercial naming/trademark-clearance issue that should be resolved before public launch.
 
 25. **NCSC — Thinking carefully before adopting agentic AI**  
     https://www.ncsc.gov.uk/blogs/thinking-carefully-before-adopting-agentic-ai  
-    Recommends constrained scope, least privilege, secure defaults and temporary credentials. MemoryGuard's runtime/operator split is designed to complement those controls.
+    Recommends constrained scope, least privilege, secure defaults and temporary credentials. AgentInterdict's runtime/operator split is designed to complement those controls.
 
 26. **NCSC — Guidelines for secure AI system development / secure design**  
     https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development/guidelines/secure-design  
@@ -151,7 +151,7 @@ Ordinary prompt injection can disappear when a context window ends. Persistent m
 | Provenance laundering | signed origin roots; derived authority cap | external/host-native stores outside the gate remain separate |
 | Blank-cheque authorization | immutable action scopes on explicit human approvals | no full transaction/consumption ledger yet |
 | Secret persistence | recognized credential/private-key rejection before write, including decoded forms | entropy-only/novel credentials may evade signatures |
-| Poison propagation | descendant graph + atomic chain containment | external copies outside MemoryGuard require separate cleanup |
+| Poison propagation | descendant graph + atomic chain containment | external copies outside AgentInterdict require separate cleanup |
 | Incident response | signed normal/read-only/lockdown modes | same-user root/admin compromise can still bypass process boundaries |
 | Direct database tampering | immutable creation signatures + mutable state seals + signed/hash-chained audit | local HMAC key compromise defeats local authenticity |
 | Retry duplication | idempotency-key/fingerprint conflict checks | consequential external effects need sink-level idempotency |
@@ -168,7 +168,7 @@ The literature supports several durable architectural conclusions:
 - **Authorization needs scope and eventually durable consumption state.** Signed approval without action binding is a blank cheque; action binding without durable consumption does not fully solve semantic replay.
 - **Secrets should be prevented from becoming memory where possible.** Detection is still heuristic and should be complemented by dedicated secret stores.
 - **Containment/rollback are first-class security features.** Prevention is not perfect, so blast-radius analysis and recovery must be engineered.
-- **No single classifier is a sufficient trust boundary.** MemoryGuard's transparent scorer is triage; cryptographic provenance and deterministic policy remain separate controls.
+- **No single classifier is a sufficient trust boundary.** AgentInterdict's transparent scorer is triage; cryptographic provenance and deterministic policy remain separate controls.
 
 ## 9. Research-to-product gaps still open
 

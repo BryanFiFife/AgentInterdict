@@ -12,14 +12,14 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from fastapi.testclient import TestClient
 
 TEST_DB = Path(__file__).parent / "hardening-test.db"
-os.environ["MEMORYGUARD_SECRET"] = "hardening-test-secret-0123456789abcdef0123456789abcdef"
-os.environ["MEMORYGUARD_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
-os.environ["MEMORYGUARD_DB"] = str(TEST_DB)
-os.environ.pop("MEMORYGUARD_API_KEY", None)
+os.environ["AGENTINTERDICT_SECRET"] = "hardening-test-secret-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_DB"] = str(TEST_DB)
+os.environ.pop("AGENTINTERDICT_API_KEY", None)
 
-from memoryguard import db, service, licensing
-from memoryguard.app import app
-from memoryguard.errors import ConflictError, ValidationError
+from agentinterdict import db, service, licensing
+from agentinterdict.app import app
+from agentinterdict.errors import ConflictError, ValidationError
 
 
 @pytest.fixture(autouse=True)
@@ -28,8 +28,8 @@ def fresh(monkeypatch, tmp_path):
     if TEST_DB.exists():
         TEST_DB.unlink()
     db.DB_PATH = TEST_DB
-    monkeypatch.delenv("MEMORYGUARD_API_KEY", raising=False)
-    monkeypatch.setenv("MEMORYGUARD_BACKUP_DIR", str(tmp_path / "backups"))
+    monkeypatch.delenv("AGENTINTERDICT_API_KEY", raising=False)
+    monkeypatch.setenv("AGENTINTERDICT_BACKUP_DIR", str(tmp_path / "backups"))
     db.init_db()
     yield
     db.DB_PATH = old
@@ -153,7 +153,7 @@ def test_audit_rehash_without_hmac_is_detected():
 
 
 def test_backup_creates_readable_database_and_audit_event(tmp_path, monkeypatch):
-    monkeypatch.setenv("MEMORYGUARD_BACKUP_DIR", str(tmp_path / "bk"))
+    monkeypatch.setenv("AGENTINTERDICT_BACKUP_DIR", str(tmp_path / "bk"))
     ingest_text("backup me")
     result = service.backup("test")
     backup = Path(result["path"])
@@ -183,12 +183,12 @@ def test_parallel_ingest_does_not_drop_writes():
 
 
 def test_api_key_protects_api_but_not_health(monkeypatch):
-    monkeypatch.setenv("MEMORYGUARD_API_KEY", "super-secret-api-key-0123456789abcdef")
+    monkeypatch.setenv("AGENTINTERDICT_API_KEY", "super-secret-api-key-0123456789abcdef")
     with TestClient(app) as c:
         assert c.get("/health").status_code == 200
         assert c.get("/api/v1/system").status_code == 401
-        assert c.get("/api/v1/system", headers={"X-MemoryGuard-Key":"wrong"}).status_code == 401
-        assert c.get("/api/v1/system", headers={"X-MemoryGuard-Key":"super-secret-api-key-0123456789abcdef"}).status_code == 200
+        assert c.get("/api/v1/system", headers={"X-AgentInterdict-Key":"wrong"}).status_code == 401
+        assert c.get("/api/v1/system", headers={"X-AgentInterdict-Key":"super-secret-api-key-0123456789abcdef"}).status_code == 200
 
 
 def test_oversized_http_body_rejected_before_model_validation():
@@ -218,7 +218,7 @@ def test_migration_from_v02_shape_preserves_data_and_creates_backup(tmp_path, mo
         con.execute("INSERT INTO memories(namespace,content,content_hash,source_type,origin_id,authority,status,risk_score,risk_severity,risk_signals,metadata,created_by,created_at,signature) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     ("legacy","hello","hash","web","origin","untrusted","allowed",8,"low","[]","{}","old","2026-01-01T00:00:00+00:00","sig"))
     db.DB_PATH = legacy
-    monkeypatch.setenv("MEMORYGUARD_BACKUP_DIR", str(tmp_path / "backups"))
+    monkeypatch.setenv("AGENTINTERDICT_BACKUP_DIR", str(tmp_path / "backups"))
     db.init_db()
     with sqlite3.connect(legacy) as con:
         cols = {r[1] for r in con.execute("PRAGMA table_info(memories)")}
@@ -226,7 +226,7 @@ def test_migration_from_v02_shape_preserves_data_and_creates_backup(tmp_path, mo
         assert {"origin_roots","idempotency_key","state_signature","request_fingerprint"} <= cols
         assert "event_signature" in acols
         assert con.execute("SELECT content FROM memories WHERE namespace='legacy'").fetchone()[0] == "hello"
-    assert list((tmp_path / "backups").glob("memoryguard-pre-migration-*.db"))
+    assert list((tmp_path / "backups").glob("agentinterdict-pre-migration-*.db"))
 
 
 def _signed_token(private, payload):
@@ -240,15 +240,15 @@ def test_malformed_signed_license_timestamp_fails_closed(tmp_path, monkeypatch):
     pub = tmp_path / "pub.pem"
     pub.write_bytes(private.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
     token = _signed_token(private, {"plan":"pro","expires_at":"not-a-date","features":licensing.PLAN_FEATURES["pro"]})
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_PUBLIC_KEY_FILE", str(pub))
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_TOKEN", token)
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_PUBLIC_KEY_FILE", str(pub))
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_TOKEN", token)
     status = licensing.get_license_status()
     assert status.valid is False
     assert status.plan == "community"
 
 
 def test_oversized_license_token_fails_closed(monkeypatch):
-    monkeypatch.setenv("MEMORYGUARD_LICENSE_TOKEN", "x" * 40_000)
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_TOKEN", "x" * 40_000)
     status = licensing.get_license_status()
     assert status.valid is False
     assert status.plan == "community"
@@ -266,9 +266,9 @@ def test_chunked_oversized_http_body_is_rejected_without_content_length():
 
 
 def test_startup_refuses_demo_signing_secret(monkeypatch):
-    from memoryguard.security import DEMO_SECRET
-    monkeypatch.setenv("MEMORYGUARD_SECRET", DEMO_SECRET.decode())
-    monkeypatch.delenv("MEMORYGUARD_ALLOW_INSECURE_DEMO", raising=False)
+    from agentinterdict.security import DEMO_SECRET
+    monkeypatch.setenv("AGENTINTERDICT_SECRET", DEMO_SECRET.decode())
+    monkeypatch.delenv("AGENTINTERDICT_ALLOW_INSECURE_DEMO", raising=False)
     try:
         with TestClient(app):
             pass
@@ -279,9 +279,9 @@ def test_startup_refuses_demo_signing_secret(monkeypatch):
 
 
 def test_startup_refuses_remote_bind_without_api_key(monkeypatch):
-    monkeypatch.setenv("MEMORYGUARD_SECRET", "remote-test-secret-0123456789abcdef0123456789abcdef")
-    monkeypatch.setenv("MEMORYGUARD_HOST", "0.0.0.0")
-    monkeypatch.delenv("MEMORYGUARD_API_KEY", raising=False)
+    monkeypatch.setenv("AGENTINTERDICT_SECRET", "remote-test-secret-0123456789abcdef0123456789abcdef")
+    monkeypatch.setenv("AGENTINTERDICT_HOST", "0.0.0.0")
+    monkeypatch.delenv("AGENTINTERDICT_API_KEY", raising=False)
     try:
         with TestClient(app):
             pass
@@ -290,7 +290,7 @@ def test_startup_refuses_remote_bind_without_api_key(monkeypatch):
     else:
         raise AssertionError("startup accepted a configured unauthenticated remote bind")
 
-OPERATOR_HEADERS = {"X-MemoryGuard-Operator-Key": "operator-test-key-0123456789abcdef0123456789abcdef"}
+OPERATOR_HEADERS = {"X-AgentInterdict-Operator-Key": "operator-test-key-0123456789abcdef0123456789abcdef"}
 
 
 def test_untrusted_service_cannot_claim_system_authority():
@@ -389,7 +389,7 @@ def test_past_expiry_and_actor_controls_are_rejected():
 
 
 def test_startup_refuses_missing_or_short_operator_key(monkeypatch):
-    monkeypatch.setenv("MEMORYGUARD_OPERATOR_KEY", "short")
+    monkeypatch.setenv("AGENTINTERDICT_OPERATOR_KEY", "short")
     with pytest.raises(RuntimeError, match="OPERATOR_KEY"):
         with TestClient(app):
             pass
@@ -463,7 +463,7 @@ def test_migration_schema_changes_are_atomic_on_failure(tmp_path, monkeypatch):
         );
         """)
     db.DB_PATH = legacy
-    monkeypatch.setenv("MEMORYGUARD_BACKUP_DIR", str(tmp_path / "backups"))
+    monkeypatch.setenv("AGENTINTERDICT_BACKUP_DIR", str(tmp_path / "backups"))
     original = db._ensure_column
     calls = {"n": 0}
 
@@ -479,7 +479,7 @@ def test_migration_schema_changes_are_atomic_on_failure(tmp_path, monkeypatch):
     with sqlite3.connect(legacy) as con:
         cols = {r[1] for r in con.execute("PRAGMA table_info(memories)")}
     assert "origin_roots" not in cols
-    assert list((tmp_path / "backups").glob("memoryguard-pre-migration-*.db"))
+    assert list((tmp_path / "backups").glob("agentinterdict-pre-migration-*.db"))
 
 
 def test_ordinary_service_and_api_cannot_claim_human_origin():
@@ -512,7 +512,7 @@ def test_deep_metadata_is_rejected_without_recursion_failure():
 
 def test_wrong_signing_secret_is_detected_at_database_startup(monkeypatch):
     ingest_text("binding marker")
-    monkeypatch.setenv("MEMORYGUARD_SECRET", "different-signing-secret-0123456789abcdef0123456789abcdef")
+    monkeypatch.setenv("AGENTINTERDICT_SECRET", "different-signing-secret-0123456789abcdef0123456789abcdef")
     with pytest.raises(Exception, match="signing secret does not match"):
         db.init_db()
 
@@ -522,7 +522,7 @@ def test_installer_refuses_symlinked_secret_file(tmp_path, monkeypatch):
     monkeypatch.setattr(self_install, "ROOT", tmp_path)
     target = tmp_path / "outside-secret"
     target.write_text("x" * 64, encoding="utf-8")
-    link = tmp_path / ".memoryguard-secret"
+    link = tmp_path / ".agentinterdict-secret"
     try:
         link.symlink_to(target)
     except (OSError, NotImplementedError):

@@ -58,7 +58,7 @@ def main() -> int:
         for problem in problems:
             print("FAIL:", problem)
         return 2
-    print(f"OK: verified {len(files)} shipped files for MemoryGuard {data.get('version', 'unknown')}")
+    print(f"OK: verified {len(files)} shipped files for AgentInterdict {data.get('version', 'unknown')}")
     print("NOTE: this SHA-256 manifest detects modification but is not a vendor authenticity signature.")
     return 0
 

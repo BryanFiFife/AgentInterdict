@@ -1,6 +1,6 @@
-# MemoryGuard License
+# AgentInterdict License
 
-MemoryGuard is distributed under a **dual license**:
+AgentInterdict is distributed under a **dual license**:
 
 ## Community (Free)
 
@@ -17,15 +17,15 @@ a paid subscription to the relevant tier.
 ### Key terms
 
 - The **source code** in this repository is freely available to download and inspect.
-- **Paid features are remotely controlled** and served from the MemoryGuard control
+- **Paid features are remotely controlled** and served from the AgentInterdict control
   plane. They are gated by a signed licence lease and are not part of the free build.
 - You may **not** redistribute the paid remote features, bypass the licence
   verification, or resell the software without a commercial agreement.
-- MemoryGuard is provided **"as is"** without warranty of any kind. See the
+- AgentInterdict is provided **"as is"** without warranty of any kind. See the
   security claim in the README: it reduces and contains persistent-memory risk
   but does not make prompt injection impossible.
 
 For commercial licensing, enterprise agreements, or redistribution rights, contact
-the MemoryGuard team.
+the AgentInterdict team.
 
-© 2026 MemoryGuard
+© 2026 AgentInterdict

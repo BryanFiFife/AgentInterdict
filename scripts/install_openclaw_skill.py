@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE = ROOT / "agent_install" / "openclaw-skill" / "memoryguard" / "SKILL.md"
+TEMPLATE = ROOT / "agent_install" / "openclaw-skill" / "agentinterdict" / "SKILL.md"
 
 
 def _runtime_python() -> Path:
@@ -27,7 +27,7 @@ def _runtime_python() -> Path:
                     return candidate
         except (OSError, json.JSONDecodeError, ValueError, TypeError):
             pass
-    raise SystemExit("MemoryGuard runtime Python is missing; run scripts/self_install.py first")
+    raise SystemExit("AgentInterdict runtime Python is missing; run scripts/self_install.py first")
 
 
 def _atomic_write(path: Path, text: str) -> None:
@@ -48,28 +48,28 @@ def _atomic_write(path: Path, text: str) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Install the MemoryGuard skill into an OpenClaw workspace")
+    ap = argparse.ArgumentParser(description="Install the AgentInterdict skill into an OpenClaw workspace")
     ap.add_argument("--workspace", required=True, help="Absolute OpenClaw workspace directory")
     args = ap.parse_args()
     workspace = Path(args.workspace).expanduser().resolve()
     if not workspace.exists() or not workspace.is_dir():
         raise SystemExit(f"workspace does not exist: {workspace}")
     if not TEMPLATE.is_file():
-        raise SystemExit(f"MemoryGuard OpenClaw skill template is missing: {TEMPLATE}")
+        raise SystemExit(f"AgentInterdict OpenClaw skill template is missing: {TEMPLATE}")
 
-    target = workspace / "skills" / "memoryguard"
+    target = workspace / "skills" / "agentinterdict"
     target.mkdir(parents=True, exist_ok=True)
     target_file = target / "SKILL.md"
     if target_file.exists():
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-        backup = target / f"SKILL.md.pre-memoryguard-{stamp}.bak"
+        backup = target / f"SKILL.md.pre-agentinterdict-{stamp}.bak"
         shutil.copy2(target_file, backup)
         print(f"Backed up existing skill to {backup}")
 
     runtime = _runtime_python()
     text = TEMPLATE.read_text(encoding="utf-8")
-    text = text.replace("__MEMORYGUARD_ROOT__", str(ROOT)).replace("__VENV_PYTHON__", str(runtime))
-    if "__MEMORYGUARD_ROOT__" in text or "__VENV_PYTHON__" in text:
+    text = text.replace("__AGENTINTERDICT_ROOT__", str(ROOT)).replace("__VENV_PYTHON__", str(runtime))
+    if "__AGENTINTERDICT_ROOT__" in text or "__VENV_PYTHON__" in text:
         raise SystemExit("OpenClaw skill template rendering failed; placeholders remain")
     _atomic_write(target_file, text)
     print(target_file)

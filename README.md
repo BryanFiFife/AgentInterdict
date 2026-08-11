@@ -1,17 +1,17 @@
 <div align="center">
 
-# 🛡️ MemoryGuard
+# 🛡️ AgentInterdict
 
 ### The local security gateway for AI-agent memory
 
-MemoryGuard sits between your agent and its long-term memory. It **binds authority to origin**, **blocks credential leakage**, **quarantines prompt-injection poisoning**, and **evaluates recalled memory at action time** — so your agent's memory can't be weaponised against it.
+AgentInterdict sits between your agent and its long-term memory. It **binds authority to origin**, **blocks credential leakage**, **quarantines prompt-injection poisoning**, and **evaluates recalled memory at action time** — so your agent's memory can't be weaponised against it.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Commercial-blueviolet?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-4f8cff?style=for-the-badge)](#)
-[![CI](https://img.shields.io/github/actions/workflow/status/BryanFiFife/MemoryGuard/ci.yml?style=for-the-badge&label=CI&logo=github)](https://github.com/BryanFiFife/MemoryGuard/actions)
-[![Stars](https://img.shields.io/github/stars/BryanFiFife/MemoryGuard?style=for-the-badge&logo=github&color=gold)](https://github.com/BryanFiFife/MemoryGuard)
-[![Forks](https://img.shields.io/github/forks/BryanFiFife/MemoryGuard?style=for-the-badge&logo=github)](https://github.com/BryanFiFife/MemoryGuard)
+[![CI](https://img.shields.io/github/actions/workflow/status/BryanFiFife/AgentInterdict/ci.yml?style=for-the-badge&label=CI&logo=github)](https://github.com/BryanFiFife/AgentInterdict/actions)
+[![Stars](https://img.shields.io/github/stars/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github&color=gold)](https://github.com/BryanFiFife/AgentInterdict)
+[![Forks](https://img.shields.io/github/forks/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github)](https://github.com/BryanFiFife/AgentInterdict)
 
 **Free forever · Local-first · Fail-closed**
 
@@ -19,9 +19,9 @@ MemoryGuard sits between your agent and its long-term memory. It **binds authori
 
 ---
 
-## ✨ Why MemoryGuard?
+## ✨ Why AgentInterdict?
 
-AI agents persist memory — and that memory is a **prime attack surface**. A single poisoned memory can make an agent leak secrets, ignore instructions, or take destructive actions. MemoryGuard is a **local, transparent gateway** that sits between your agent and its memory store and enforces six security invariants:
+AI agents persist memory — and that memory is a **prime attack surface**. A single poisoned memory can make an agent leak secrets, ignore instructions, or take destructive actions. AgentInterdict is a **local, transparent gateway** that sits between your agent and its memory store and enforces six security invariants:
 
 | Invariant | What it means |
 |---|---|
@@ -32,7 +32,7 @@ AI agents persist memory — and that memory is a **prime attack surface**. A si
 | 🔑 **Credentials-not-memory** | Private keys, API tokens, JWTs and credential assignments are **rejected before persistence**. |
 | 🧱 **Fail-closed tampering** | Direct DB tampering is detected; runtime flips to `lockdown`. |
 
-> **Security claim:** MemoryGuard reduces and contains persistent-memory risk. It does not make prompt injection impossible and is not a substitute for host permissions, least-trust, sandboxing, or independent human approval for high-impact actions.
+> **Security claim:** AgentInterdict reduces and contains persistent-memory risk. It does not make prompt injection impossible and is not a substitute for host permissions, least-trust, sandboxing, or independent human approval for high-impact actions.
 
 ---
 
@@ -57,12 +57,12 @@ All packages are built from this repository. **One source, one download.**
 
 | Tier | Download | Threat feed | Remote features |
 |---|---|---|---|
-| **Community** · Free | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | Static (baked-in) | — |
-| **Pro** · £79/mo | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ Advanced classifier, reputation feed |
-| **Business** · £349/mo | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + Policy packs, compliance packs, model hardening |
-| **Enterprise** · £1,500/mo | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + CVE advisory feed, anomaly detection, remote audit |
+| **Community** · Free | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | Static (baked-in) | — |
+| **Pro** · £79/mo | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ Advanced classifier, reputation feed |
+| **Business** · £349/mo | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + Policy packs, compliance packs, model hardening |
+| **Enterprise** · £1,500/mo | [⬇️ Download](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + CVE advisory feed, anomaly detection, remote audit |
 
-> **How it works:** the code is free and open to download. Paid tiers unlock **remotely-controlled features** — the updated threat feed, hosted classifiers, policy packs and more — which are served from the MemoryGuard control plane and gated by your **signed licence lease**. Your agent presents its lease; the control plane verifies it cryptographically and serves the features your plan includes.
+> **How it works:** the code is free and open to download. Paid tiers unlock **remotely-controlled features** — the updated threat feed, hosted classifiers, policy packs and more — which are served from the AgentInterdict control plane and gated by your **signed licence lease**. Your agent presents its lease; the control plane verifies it cryptographically and serves the features your plan includes.
 
 ---
 
@@ -140,7 +140,7 @@ GET  /api/v1/stats         # gateway statistics
 
 ## 🧰 Integrations
 
-- **Hermes** — [`integrations/hermes/memoryguard/`](integrations/hermes/memoryguard/)
+- **Hermes** — [`integrations/hermes/agentinterdict/`](integrations/hermes/agentinterdict/)
 - **OpenClaw** — [`agent_install/openclaw-skill/`](agent_install/openclaw-skill/)
 - **MCP** — [`integrations/mcp/server.py`](integrations/mcp/server.py)
 - **Generic REST** — [`examples/client.py`](examples/client.py)
@@ -185,7 +185,7 @@ If poisoning or tampering is suspected:
 
 ## 📄 License
 
-MemoryGuard is **free for Community use** and commercially licensed for Pro, Business, and Enterprise tiers. See the [LICENSE](LICENSE) for terms.
+AgentInterdict is **free for Community use** and commercially licensed for Pro, Business, and Enterprise tiers. See the [LICENSE](LICENSE) for terms.
 
 ---
 
@@ -193,6 +193,6 @@ MemoryGuard is **free for Community use** and commercially licensed for Pro, Bus
 
 **Built with ❤️ for safer AI agents**
 
-[⬇️ Download Community](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) · [⭐ Star this repo](https://github.com/BryanFiFife/MemoryGuard) · [🐛 Report an issue](https://github.com/BryanFiFife/MemoryGuard/issues)
+[⬇️ Download Community](https://github.com/BryanFiFife/AgentInterdict/archive/refs/heads/main.zip) · [⭐ Star this repo](https://github.com/BryanFiFife/AgentInterdict) · [🐛 Report an issue](https://github.com/BryanFiFife/AgentInterdict/issues)
 
 </div>

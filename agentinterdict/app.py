@@ -14,39 +14,39 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import config, db, service
-from .errors import ConflictError, IntegrityError, MemoryGuardError, StorageBusyError, StorageCorruptionError, StorageError, ValidationError
+from .errors import ConflictError, IntegrityError, AgentInterdictError, StorageBusyError, StorageCorruptionError, StorageError, ValidationError
 from .licensing import get_license_status
 from .models import ActionCheckRequest, IngestRequest, PromoteRequest, ReviewRequest, ReviseRequest, RuntimeModeRequest, ScanRequest, SearchRequest
 from .security import DEMO_SECRET, signing_secret_status
 
-log = logging.getLogger("memoryguard")
-logging.basicConfig(level=os.getenv("MEMORYGUARD_LOG_LEVEL", "INFO").upper(), format="%(asctime)s %(levelname)s %(name)s %(message)s")
+log = logging.getLogger("agentinterdict")
+logging.basicConfig(level=os.getenv("AGENTINTERDICT_LOG_LEVEL", "INFO").upper(), format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-MAX_HTTP_BODY = config.env_int("MEMORYGUARD_MAX_HTTP_BODY", 1_200_000, 65_536, 10_000_000)
+MAX_HTTP_BODY = config.env_int("AGENTINTERDICT_MAX_HTTP_BODY", 1_200_000, 65_536, 10_000_000)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     secret_status = signing_secret_status()
     if not secret_status["usable"]:
-        raise RuntimeError("MemoryGuard refuses to start with a missing, demo, or short signing secret; run the installer or set MEMORYGUARD_SECRET to a random 32+ byte value")
+        raise RuntimeError("AgentInterdict refuses to start with a missing, demo, or short signing secret; run the installer or set AGENTINTERDICT_SECRET to a random 32+ byte value")
     api_key = config.api_key()
     if api_key and len(api_key.encode("utf-8")) < 32:
-        raise RuntimeError("MEMORYGUARD_API_KEY must be at least 32 bytes when configured")
+        raise RuntimeError("AGENTINTERDICT_API_KEY must be at least 32 bytes when configured")
     operator_key = config.operator_key()
     if len(operator_key.encode("utf-8")) < 32:
-        raise RuntimeError("MEMORYGUARD_OPERATOR_KEY must be configured with at least 32 bytes; run the installer")
+        raise RuntimeError("AGENTINTERDICT_OPERATOR_KEY must be configured with at least 32 bytes; run the installer")
     if config.is_remote_bind() and not api_key:
-        raise RuntimeError("MemoryGuard refuses a configured remote bind without MEMORYGUARD_API_KEY")
+        raise RuntimeError("AgentInterdict refuses a configured remote bind without AGENTINTERDICT_API_KEY")
     db.init_db()
     diag = db.diagnostics()
     if not diag["ok"]:
-        raise RuntimeError("MemoryGuard storage diagnostics failed; startup aborted to protect persistent state")
+        raise RuntimeError("AgentInterdict storage diagnostics failed; startup aborted to protect persistent state")
     yield
 
 
 app = FastAPI(
-    title="MemoryGuard",
+    title="AgentInterdict",
     version=config.VERSION,
     description="Origin-bound security gateway for persistent AI agent memory",
     lifespan=lifespan,
@@ -68,9 +68,9 @@ async def security_middleware(request: Request, call_next):
 
     required_key = config.api_key()
     if required_key and request.url.path.startswith("/api/v1/"):
-        supplied = request.headers.get("x-memoryguard-key", "")
+        supplied = request.headers.get("x-agentinterdict-key", "")
         if not supplied or not hmac.compare_digest(supplied, required_key):
-            return JSONResponse({"detail": "MemoryGuard API key required", "request_id": request_id}, status_code=401)
+            return JSONResponse({"detail": "AgentInterdict API key required", "request_id": request_id}, status_code=401)
 
     # Content-Length is not mandatory (for example with Transfer-Encoding: chunked),
     # so bound the stream before FastAPI/Pydantic parses it. The accumulated body is
@@ -93,7 +93,7 @@ async def security_middleware(request: Request, call_next):
         response = await call_next(request)
     except Exception:
         log.exception("Unhandled request failure request_id=%s path=%s", request_id, request.url.path)
-        return JSONResponse({"detail": "internal MemoryGuard error", "request_id": request_id}, status_code=500)
+        return JSONResponse({"detail": "internal AgentInterdict error", "request_id": request_id}, status_code=500)
 
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -146,11 +146,11 @@ async def storage_handler(request: Request, exc: StorageError):
 
 def _require_operator(request: Request) -> None:
     expected = config.operator_key()
-    supplied = request.headers.get("x-memoryguard-operator-key", "")
+    supplied = request.headers.get("x-agentinterdict-operator-key", "")
     if len(expected.encode("utf-8")) < 32:
-        raise HTTPException(503, "MemoryGuard operator authority is not configured")
+        raise HTTPException(503, "AgentInterdict operator authority is not configured")
     if not supplied or not hmac.compare_digest(supplied, expected):
-        raise HTTPException(403, "MemoryGuard operator key required")
+        raise HTTPException(403, "AgentInterdict operator key required")
 
 
 @app.get("/")
@@ -162,7 +162,7 @@ def dashboard():
 def health():
     live = db.liveness()
     public_storage = {"ok": live["ok"], "schema_version": live.get("schema_version")}
-    payload = {"ok": live["ok"], "service": "memoryguard", "version": config.VERSION, "storage": public_storage}
+    payload = {"ok": live["ok"], "service": "agentinterdict", "version": config.VERSION, "storage": public_storage}
     return JSONResponse(payload, status_code=200 if live["ok"] else 503)
 
 
@@ -183,7 +183,7 @@ def action_check(req: ActionCheckRequest):
 
 @app.get("/api/v1/system")
 def system_status():
-    secret = os.getenv("MEMORYGUARD_SECRET", DEMO_SECRET.decode()).encode()
+    secret = os.getenv("AGENTINTERDICT_SECRET", DEMO_SECRET.decode()).encode()
     live = db.liveness()
     return {
         "version": config.VERSION,

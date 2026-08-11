@@ -4,12 +4,12 @@ import sqlite3
 import pytest
 
 TEST_DB = Path(__file__).parent / "v04-test.db"
-os.environ["MEMORYGUARD_DB"] = str(TEST_DB)
-os.environ["MEMORYGUARD_SECRET"] = "v04-test-secret-0123456789abcdef0123456789abcdef"
-os.environ["MEMORYGUARD_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
-os.environ.pop("MEMORYGUARD_API_KEY", None)
+os.environ["AGENTINTERDICT_DB"] = str(TEST_DB)
+os.environ["AGENTINTERDICT_SECRET"] = "v04-test-secret-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
+os.environ.pop("AGENTINTERDICT_API_KEY", None)
 
-from memoryguard import db, service
+from agentinterdict import db, service
 
 @pytest.fixture(autouse=True)
 def fresh():

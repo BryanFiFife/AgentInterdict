@@ -10,7 +10,7 @@ import unicodedata
 from urllib.parse import unquote_to_bytes
 from dataclasses import asdict, dataclass
 
-DEMO_SECRET = b"memoryguard-demo-secret-change-me"
+DEMO_SECRET = b"agentinterdict-demo-secret-change-me"
 
 # Common confusables used in prompt-injection evasion. This is deliberately small and
 # auditable; higher tiers can add model-based or threat-feed classifiers without making
@@ -36,18 +36,18 @@ class RiskResult:
 
 
 def _secret() -> bytes:
-    raw = os.getenv("MEMORYGUARD_SECRET", DEMO_SECRET.decode()).encode("utf-8")
-    allow_demo = os.getenv("MEMORYGUARD_ALLOW_INSECURE_DEMO", "").strip().lower() in {"1", "true", "yes"}
+    raw = os.getenv("AGENTINTERDICT_SECRET", DEMO_SECRET.decode()).encode("utf-8")
+    allow_demo = os.getenv("AGENTINTERDICT_ALLOW_INSECURE_DEMO", "").strip().lower() in {"1", "true", "yes"}
     if raw == DEMO_SECRET and not allow_demo:
-        raise RuntimeError("MEMORYGUARD_SECRET is not configured; run the installer or provide a random 32+ byte secret")
+        raise RuntimeError("AGENTINTERDICT_SECRET is not configured; run the installer or provide a random 32+ byte secret")
     if len(raw) < 32:
-        raise RuntimeError("MEMORYGUARD_SECRET must be at least 32 bytes")
+        raise RuntimeError("AGENTINTERDICT_SECRET must be at least 32 bytes")
     return raw
 
 
 def signing_secret_status() -> dict:
-    raw = os.getenv("MEMORYGUARD_SECRET", DEMO_SECRET.decode()).encode("utf-8")
-    allow_demo = os.getenv("MEMORYGUARD_ALLOW_INSECURE_DEMO", "").strip().lower() in {"1", "true", "yes"}
+    raw = os.getenv("AGENTINTERDICT_SECRET", DEMO_SECRET.decode()).encode("utf-8")
+    allow_demo = os.getenv("AGENTINTERDICT_ALLOW_INSECURE_DEMO", "").strip().lower() in {"1", "true", "yes"}
     return {
         "configured": raw != DEMO_SECRET,
         "length_ok": len(raw) >= 32,

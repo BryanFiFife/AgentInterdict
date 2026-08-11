@@ -1,4 +1,4 @@
-"""Minimal agent-side integration. Run while MemoryGuard is listening on localhost:43847."""
+"""Minimal agent-side integration. Run while AgentInterdict is listening on localhost:43847."""
 import httpx
 
 BASE = "http://127.0.0.1:43847"

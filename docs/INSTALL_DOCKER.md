@@ -1,8 +1,8 @@
-# Docker deployment — MemoryGuard v0.4
+# Docker deployment — AgentInterdict v0.4
 
 ## 1. Generate a real signing secret
 
-Do not store the vendor licence-signing private key here. This is only the local HMAC secret used for MemoryGuard creation/audit records.
+Do not store the vendor licence-signing private key here. This is only the local HMAC secret used for AgentInterdict creation/audit records.
 
 Example:
 
@@ -13,17 +13,17 @@ python -c "import secrets; print(secrets.token_hex(32))"
 Set the signing secret, a separate API key, and a separate operator key in your shell or secret manager:
 
 ```bash
-export MEMORYGUARD_SECRET='<generated signing secret>'
-export MEMORYGUARD_API_KEY='<different long random API key>'
-export MEMORYGUARD_OPERATOR_KEY='<different long random operator key>'
+export AGENTINTERDICT_SECRET='<generated signing secret>'
+export AGENTINTERDICT_API_KEY='<different long random API key>'
+export AGENTINTERDICT_OPERATOR_KEY='<different long random operator key>'
 ```
 
 PowerShell:
 
 ```powershell
-$env:MEMORYGUARD_SECRET='<generated signing secret>'
-$env:MEMORYGUARD_API_KEY='<different long random API key>'
-$env:MEMORYGUARD_OPERATOR_KEY='<different long random operator key>'
+$env:AGENTINTERDICT_SECRET='<generated signing secret>'
+$env:AGENTINTERDICT_API_KEY='<different long random API key>'
+$env:AGENTINTERDICT_OPERATOR_KEY='<different long random operator key>'
 ```
 
 ## 2. Start
@@ -37,12 +37,12 @@ The published host listener is loopback-only by default and maps to port `43847`
 Override the port:
 
 ```bash
-MEMORYGUARD_PORT=45137 docker compose up --build
+AGENTINTERDICT_PORT=45137 docker compose up --build
 ```
 
 ## 3. Remote access
 
-Do not change the published binding to a public interface without an authenticated reverse proxy or `MEMORYGUARD_API_KEY`. The container itself binds internally to `0.0.0.0`, but Compose publishes it only on host `127.0.0.1` by default.
+Do not change the published binding to a public interface without an authenticated reverse proxy or `AGENTINTERDICT_API_KEY`. The container itself binds internally to `0.0.0.0`, but Compose publishes it only on host `127.0.0.1` by default.
 
 ## Hardening included
 

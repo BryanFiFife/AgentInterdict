@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build per-tier MemoryGuard download packages.
+"""Build per-tier AgentInterdict download packages.
 
 Assembles a self-contained ZIP for each tier:
   - community: static baked-in threat list (community.json), no network needed
   - pro / business / enterprise: dynamic threat list fetched from the vendor
     control plane (/v1/threats?tier=...), refreshed weekly by the Worker cron
 
-Each package contains the full MemoryGuard source, the tier's threat list,
+Each package contains the full AgentInterdict source, the tier's threat list,
 the activation client, the licence public key, and install docs.
 
 Usage:
@@ -27,9 +27,9 @@ DEFAULT_OUT = ROOT / "dist_packages"
 # Files/dirs to exclude from every package (secrets, caches, dev artifacts).
 EXCLUDE = {
     ".git", ".venv", "__pycache__", ".pytest_cache", "*.pyc", "*.db", "*.db-wal",
-    "*.db-shm", ".env", ".memoryguard-secret", ".memoryguard-operator-key",
-    ".memoryguard-port", "installation-result.json", "backups", "data", "secrets",
-    "commercial.db", "dist_packages", "*.pem", "!memoryguard/license_public_key.pem",
+    "*.db-shm", ".env", ".agentinterdict-secret", ".agentinterdict-operator-key",
+    ".agentinterdict-port", "installation-result.json", "backups", "data", "secrets",
+    "commercial.db", "dist_packages", "*.pem", "!agentinterdict/license_public_key.pem",
 }
 
 # Threat-list source per tier.
@@ -42,7 +42,7 @@ THREAT_SOURCE = {
 }
 
 # Default control-plane base URL for paid tiers (overridable).
-DEFAULT_CONTROL_PLANE = "https://memoryguard-funnel.bryansmall26.workers.dev"
+DEFAULT_CONTROL_PLANE = "https://agentinterdict-funnel.bryansmall26.workers.dev"
 
 
 def _should_include(rel: str) -> bool:
@@ -52,9 +52,9 @@ def _should_include(rel: str) -> bool:
             return False
     if rel.endswith((".pyc", ".db", ".db-wal", ".db-shm", ".log", ".pid")):
         return False
-    if rel in {".env", ".memoryguard-secret", ".memoryguard-operator-key", ".memoryguard-port", "installation-result.json", "commercial.db"}:
+    if rel in {".env", ".agentinterdict-secret", ".agentinterdict-operator-key", ".agentinterdict-port", "installation-result.json", "commercial.db"}:
         return False
-    if rel.endswith(".pem") and rel != "memoryguard/license_public_key.pem":
+    if rel.endswith(".pem") and rel != "agentinterdict/license_public_key.pem":
         return False
     return True
 
@@ -71,12 +71,12 @@ def _collect_files() -> list[tuple[str, Path]]:
 
 
 def _write_threat_list(tier: str, tmp: Path) -> None:
-    """Write the tier's threat list into the package's memoryguard/threats/ dir."""
-    dest_dir = tmp / "memoryguard" / "threats"
+    """Write the tier's threat list into the package's agentinterdict/threats/ dir."""
+    dest_dir = tmp / "agentinterdict" / "threats"
     dest_dir.mkdir(parents=True, exist_ok=True)
     if THREAT_SOURCE[tier] == "static":
         # Copy the baked-in community list.
-        src = ROOT / "memoryguard" / "threats" / "community.json"
+        src = ROOT / "agentinterdict" / "threats" / "community.json"
         shutil.copy2(src, dest_dir / "community.json")
     else:
         # Paid tier: write a small JSON that tells the runtime to fetch the
@@ -102,7 +102,7 @@ def _write_install_doc(tier: str, tmp: Path) -> None:
     else:
         threat_note = (
             f"This {tier.title()} build fetches an updated threat list from the "
-            f"MemoryGuard control plane ({DEFAULT_CONTROL_PLANE}/v1/threats?tier={tier}). "
+            f"AgentInterdict control plane ({DEFAULT_CONTROL_PLANE}/v1/threats?tier={tier}). "
             "The list is refreshed weekly. An internet connection is required to "
             "receive threat updates."
         )
@@ -110,13 +110,13 @@ def _write_install_doc(tier: str, tmp: Path) -> None:
             f"To activate your {tier.title()} licence, run:\n"
             f"  python scripts/activate.py --server {DEFAULT_CONTROL_PLANE} --license-key <YOUR_KEY>"
         )
-    doc = f"""# MemoryGuard {tier.title()} package
+    doc = f"""# AgentInterdict {tier.title()} package
 
 ## What's included
-- Full MemoryGuard source (memoryguard/)
+- Full AgentInterdict source (agentinterdict/)
 - {tier.title()} threat list
 - Activation client (scripts/activate.py)
-- Licence public key (memoryguard/license_public_key.pem)
+- Licence public key (agentinterdict/license_public_key.pem)
 - Install docs
 
 ## Threat list
@@ -135,7 +135,7 @@ Then open the dashboard at http://127.0.0.1:43847
 
 
 def build_package(tier: str, out_dir: Path) -> Path:
-    tmp = out_dir / f"memoryguard-{tier}-tmp"
+    tmp = out_dir / f"agentinterdict-{tier}-tmp"
     if tmp.exists():
         shutil.rmtree(tmp)
     tmp.mkdir(parents=True, exist_ok=True)
@@ -151,7 +151,7 @@ def build_package(tier: str, out_dir: Path) -> Path:
     _write_install_doc(tier, tmp)
 
     # Zip it. Collect the full file list once, then add tier-specific files.
-    zip_path = out_dir / f"memoryguard-{tier}.zip"
+    zip_path = out_dir / f"agentinterdict-{tier}.zip"
     added: set[str] = set()
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for rel, _ in _collect_files():
@@ -160,7 +160,7 @@ def build_package(tier: str, out_dir: Path) -> Path:
                 zf.write(p, rel)
                 added.add(rel)
         # Add the tier-specific threat list + install doc (skip if already added).
-        for extra in (tmp / "memoryguard" / "threats").rglob("*"):
+        for extra in (tmp / "agentinterdict" / "threats").rglob("*"):
             if extra.is_file():
                 rel = extra.relative_to(tmp).as_posix()
                 if rel not in added:
@@ -175,7 +175,7 @@ def build_package(tier: str, out_dir: Path) -> Path:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Build MemoryGuard tier packages")
+    ap = argparse.ArgumentParser(description="Build AgentInterdict tier packages")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--tier", default="community,pro,business,enterprise",
                     help="Comma-separated tiers to build")

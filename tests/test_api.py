@@ -2,15 +2,15 @@ import os
 from pathlib import Path
 
 TEST_DB = Path(__file__).parent / "api-test.db"
-os.environ["MEMORYGUARD_DB"] = str(TEST_DB)
-os.environ["MEMORYGUARD_SECRET"] = "api-test-secret-0123456789abcdef0123456789abcdef"
-os.environ["MEMORYGUARD_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
-os.environ["MEMORYGUARD_PORT"] = "43847"
-os.environ.pop("MEMORYGUARD_API_KEY", None)
+os.environ["AGENTINTERDICT_DB"] = str(TEST_DB)
+os.environ["AGENTINTERDICT_SECRET"] = "api-test-secret-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_OPERATOR_KEY"] = "operator-test-key-0123456789abcdef0123456789abcdef"
+os.environ["AGENTINTERDICT_PORT"] = "43847"
+os.environ.pop("AGENTINTERDICT_API_KEY", None)
 
 from fastapi.testclient import TestClient
-from memoryguard.app import app
-from memoryguard import db
+from agentinterdict.app import app
+from agentinterdict import db
 
 
 def setup_function():
@@ -46,11 +46,11 @@ def test_end_to_end_quarantine_and_integrity():
         m = r.json()
         assert m['status'] == 'quarantined'
         assert m['authority'] == 'untrusted'
-        assert c.get('/api/v1/integrity', headers={'X-MemoryGuard-Operator-Key': os.environ['MEMORYGUARD_OPERATOR_KEY']}).json()['ok'] is True
+        assert c.get('/api/v1/integrity', headers={'X-AgentInterdict-Operator-Key': os.environ['AGENTINTERDICT_OPERATOR_KEY']}).json()['ok'] is True
 
 
 def test_operator_only_administrative_reads():
-    op = {"X-MemoryGuard-Operator-Key": os.environ["MEMORYGUARD_OPERATOR_KEY"]}
+    op = {"X-AgentInterdict-Operator-Key": os.environ["AGENTINTERDICT_OPERATOR_KEY"]}
     with TestClient(app) as c:
         created = c.post('/api/v1/memories', json={
             'content':'ordinary runtime fact', 'source_type':'web',
@@ -91,7 +91,7 @@ def test_v04_scan_and_secret_rejection_api():
 
 
 def test_v04_action_firewall_scope_binding_api():
-    op = {"X-MemoryGuard-Operator-Key": os.environ["MEMORYGUARD_OPERATOR_KEY"]}
+    op = {"X-AgentInterdict-Operator-Key": os.environ["AGENTINTERDICT_OPERATOR_KEY"]}
     with TestClient(app) as c:
         auth = c.post('/api/v1/memories', headers=op, json={
             'content':'Approved deployment of release', 'source_type':'human_verified',
@@ -115,7 +115,7 @@ def test_v04_action_firewall_scope_binding_api():
 
 
 def test_v04_runtime_modes_operator_only_api():
-    op = {"X-MemoryGuard-Operator-Key": os.environ["MEMORYGUARD_OPERATOR_KEY"]}
+    op = {"X-AgentInterdict-Operator-Key": os.environ["AGENTINTERDICT_OPERATOR_KEY"]}
     with TestClient(app) as c:
         assert c.get('/api/v1/runtime-mode').status_code == 403
         r = c.post('/api/v1/runtime-mode', headers=op, json={'mode':'read_only','actor':'owner','reason':'test'})
@@ -127,7 +127,7 @@ def test_v04_runtime_modes_operator_only_api():
 
 
 def test_v04_containment_api_is_operator_only_and_blocks_descendants():
-    op = {"X-MemoryGuard-Operator-Key": os.environ["MEMORYGUARD_OPERATOR_KEY"]}
+    op = {"X-AgentInterdict-Operator-Key": os.environ["AGENTINTERDICT_OPERATOR_KEY"]}
     with TestClient(app) as c:
         root = c.post('/api/v1/memories', json={'content':'vendor datum','source_type':'web','created_by':'agent'}).json()
         child = c.post('/api/v1/memories', json={'content':'derived vendor datum','source_type':'derived','parent_ids':[root['id']],'created_by':'agent'}).json()

@@ -1,28 +1,28 @@
 services:
-  memoryguard:
+  agentinterdict:
     build: .
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${MEMORYGUARD_PORT:-43847}:${MEMORYGUARD_PORT:-43847}"
+      - "127.0.0.1:${AGENTINTERDICT_PORT:-43847}:${AGENTINTERDICT_PORT:-43847}"
     environment:
-      MEMORYGUARD_SECRET: "${MEMORYGUARD_SECRET:?Set MEMORYGUARD_SECRET to a long random value before Docker startup}"
-      MEMORYGUARD_DB: "/data/memoryguard.db"
-      MEMORYGUARD_BACKUP_DIR: "/data/backups"
-      MEMORYGUARD_PORT: "${MEMORYGUARD_PORT:-43847}"
-      MEMORYGUARD_HOST: "0.0.0.0"
-      MEMORYGUARD_API_KEY: "${MEMORYGUARD_API_KEY:?Set MEMORYGUARD_API_KEY before Docker startup}"
-      MEMORYGUARD_OPERATOR_KEY: "${MEMORYGUARD_OPERATOR_KEY:?Set MEMORYGUARD_OPERATOR_KEY to a separate random 32+ byte operator secret}"
+      AGENTINTERDICT_SECRET: "${AGENTINTERDICT_SECRET:?Set AGENTINTERDICT_SECRET to a long random value before Docker startup}"
+      AGENTINTERDICT_DB: "/data/agentinterdict.db"
+      AGENTINTERDICT_BACKUP_DIR: "/data/backups"
+      AGENTINTERDICT_PORT: "${AGENTINTERDICT_PORT:-43847}"
+      AGENTINTERDICT_HOST: "0.0.0.0"
+      AGENTINTERDICT_API_KEY: "${AGENTINTERDICT_API_KEY:?Set AGENTINTERDICT_API_KEY before Docker startup}"
+      AGENTINTERDICT_OPERATOR_KEY: "${AGENTINTERDICT_OPERATOR_KEY:?Set AGENTINTERDICT_OPERATOR_KEY to a separate random 32+ byte operator secret}"
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
-      - memoryguard_data:/data
+      - agentinterdict_data:/data
     read_only: true
     tmpfs:
       - /tmp
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; r=urllib.request.urlopen('http://127.0.0.1:${MEMORYGUARD_PORT:-43847}/health',timeout=3); raise SystemExit(0 if r.status==200 else 1)"]
+      test: ["CMD", "python", "-c", "import urllib.request; r=urllib.request.urlopen('http://127.0.0.1:${AGENTINTERDICT_PORT:-43847}/health',timeout=3); raise SystemExit(0 if r.status==200 else 1)"]
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 10s
 volumes:
-  memoryguard_data:
+  agentinterdict_data:

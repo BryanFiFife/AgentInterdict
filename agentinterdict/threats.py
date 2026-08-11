@@ -1,4 +1,4 @@
-"""Threat-list loader for MemoryGuard.
+"""Threat-list loader for AgentInterdict.
 
 Loads the active threat list (SIGNALS + COMPACT_PATTERNS) from a JSON data file
 so the list can be versioned and updated independently of the code. The Community
@@ -65,7 +65,7 @@ def load_threats(path: Path | None = None) -> dict[str, Any]:
     (name, compiled_pattern, weight, reason)) and 'compact_patterns' (same shape).
     """
     file = Path(path) if path is not None else Path(
-        os.getenv("MEMORYGUARD_THREAT_FILE", str(DEFAULT_THREAT_FILE))
+        os.getenv("AGENTINTERDICT_THREAT_FILE", str(DEFAULT_THREAT_FILE))
     ).expanduser()
     data = _load_threat_file(file)
 
@@ -124,7 +124,7 @@ def _fetch_remote_threats(url: str) -> dict[str, Any] | None:
 
 
 # Load the active threat list once at import time. The Community build uses the
-# static baked-in list; a paid build can point MEMORYGUARD_THREAT_FILE at a
+# static baked-in list; a paid build can point AGENTINTERDICT_THREAT_FILE at a
 # downloaded newer list.
 ACTIVE_THREATS = load_threats()
 SIGNALS: list[tuple[str, re.Pattern[str], int, str]] = ACTIVE_THREATS["signals"]

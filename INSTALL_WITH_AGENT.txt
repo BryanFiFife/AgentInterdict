@@ -1,28 +1,28 @@
-MEMORYGUARD v0.4 — SELF-INSTALL PROMPT
+AGENTINTERDICT v0.4 — SELF-INSTALL PROMPT
 
 Copy the prompt below to Hermes, OpenClaw, Claude Code, Codex, or another capable coding/automation agent.
-Replace <MEMORYGUARD_DIR> with the absolute directory containing this file.
+Replace <AGENTINTERDICT_DIR> with the absolute directory containing this file.
 
 --- BEGIN PROMPT ---
-Install and configure MemoryGuard from this local folder only:
-<MEMORYGUARD_DIR>
+Install and configure AgentInterdict from this local folder only:
+<AGENTINTERDICT_DIR>
 
 Requirements:
-1. Do not download a different MemoryGuard build or move required application files outside this directory. You may create the local .venv, database, backup directory, installation ID, logs, and host-agent integration files as documented.
+1. Do not download a different AgentInterdict build or move required application files outside this directory. You may create the local .venv, database, backup directory, installation ID, logs, and host-agent integration files as documented.
 2. Read README.md, LITERATURE.md, docs/AGENT_SELF_INSTALL.md, docs/THREAT_MODEL.md, docs/ERROR_RECOVERY.md, and the integration instructions relevant to this agent before changing anything.
 3. Verify Python 3.10+ is available. Never delete or overwrite an existing user database. If a database exists, run the migration/backup path rather than starting clean.
 4. Run: python scripts/self_install.py --with-mcp
    If `python` is not the correct launcher, use python3, `py -3`, or another verified Python 3.10+ launcher. The dependency security floor is mandatory. If secure compatible packages cannot be installed and the preinstalled runtime is below the documented bounds (including cryptography 50.x), STOP and report the dependency failure. MCP is optional unless --require-mcp is requested; if MCP cannot be installed, continue with the secure core and use Hermes/OpenClaw/REST/CLI, but report the warning.
-5. Preferred dashboard port: 43847. If occupied and no explicit MEMORYGUARD_PORT was requested, permit a documented uncommon fallback. Never kill an unrelated process to obtain the preferred port.
+5. Preferred dashboard port: 43847. If occupied and no explicit AGENTINTERDICT_PORT was requested, permit a documented uncommon fallback. Never kill an unrelated process to obtain the preferred port.
 6. Run the full pytest suite and diagnostics. Do not claim success if tests fail. Do not weaken validation, signatures, secret rejection, runtime modes, action policy, quarantine or authority rules to make tests pass.
 7. Integrate with this agent using the safest supported path:
-   - Hermes: install/register integrations/hermes/memoryguard as an external MemoryProvider, set MEMORYGUARD_URL to the final local URL, and expose the pre-action check. Preserve the documented caveat that native MEMORY.md/USER.md remains a separate write path unless the installed Hermes version is explicitly gated.
-   - OpenClaw: install agent_install/openclaw-skill/memoryguard/SKILL.md with scripts/install_openclaw_skill.py into the active workspace skills directory. Prefer an officially supported plugin/tool path only when the installed OpenClaw version documents it. Do not invent unsupported MCP/config keys.
-   - MCP-capable agent: use integrations/mcp/server.py as an authenticated thin client of the running MemoryGuard gateway.
-   - Other agent: use scripts/agent_cli.py or docs/GENERIC_AGENT_INTEGRATION.md.
-8. For normal runtime use, route persistent writes through MemoryGuard and route consequential actions through MemoryGuard's action-check endpoint/tool before execution. Do not treat a recalled memory as authorization merely because it is relevant.
-9. Treat the installer agent as temporarily trusted, but do not give the normal runtime agent `.memoryguard-secret`, `.memoryguard-operator-key`, vendor/private licensing keys, or unrestricted access to MemoryGuard state. Runtime integrations use only the gateway URL and ordinary API key. If the runtime agent has arbitrary same-user filesystem access, recommend/run MemoryGuard under a separate service account/container.
-10. Start bound to 127.0.0.1 unless remote access is explicitly requested. Remote binding requires MEMORYGUARD_API_KEY and a secured deployment path; do not expose an unauthenticated remote gateway.
+   - Hermes: install/register integrations/hermes/agentinterdict as an external MemoryProvider, set AGENTINTERDICT_URL to the final local URL, and expose the pre-action check. Preserve the documented caveat that native MEMORY.md/USER.md remains a separate write path unless the installed Hermes version is explicitly gated.
+   - OpenClaw: install agent_install/openclaw-skill/agentinterdict/SKILL.md with scripts/install_openclaw_skill.py into the active workspace skills directory. Prefer an officially supported plugin/tool path only when the installed OpenClaw version documents it. Do not invent unsupported MCP/config keys.
+   - MCP-capable agent: use integrations/mcp/server.py as an authenticated thin client of the running AgentInterdict gateway.
+   - Other agent: use scripts/interdict.py or docs/GENERIC_AGENT_INTEGRATION.md.
+8. For normal runtime use, route persistent writes through AgentInterdict and route consequential actions through AgentInterdict's action-check endpoint/tool before execution. Do not treat a recalled memory as authorization merely because it is relevant.
+9. Treat the installer agent as temporarily trusted, but do not give the normal runtime agent `.agentinterdict-secret`, `.agentinterdict-operator-key`, vendor/private licensing keys, or unrestricted access to AgentInterdict state. Runtime integrations use only the gateway URL and ordinary API key. If the runtime agent has arbitrary same-user filesystem access, recommend/run AgentInterdict under a separate service account/container.
+10. Start bound to 127.0.0.1 unless remote access is explicitly requested. Remote binding requires AGENTINTERDICT_API_KEY and a secured deployment path; do not expose an unauthenticated remote gateway.
 11. Before finishing, verify all of the following:
     - /health returns HTTP 200 with ok=true and the dashboard renders.
     - scripts/doctor.py succeeds, or operator-authenticated /api/v1/integrity returns ok=true.

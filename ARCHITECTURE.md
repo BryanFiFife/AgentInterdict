@@ -1,4 +1,4 @@
-# MemoryGuard v0.4 architecture
+# AgentInterdict v0.4 architecture
 
 ## Core invariants
 
@@ -90,11 +90,11 @@ The gateway independently raises the effective risk when the action text contain
 - refuses derived memories as action authorization even when their parents were authoritative;
 - records only an action hash and policy result in the audit log.
 
-Passing MemoryGuard does **not** bypass the host agent's tool permissions, user confirmations or external policy engine.
+Passing AgentInterdict does **not** bypass the host agent's tool permissions, user confirmations or external policy engine.
 
 ## Incident containment
 
-An operator can request a contamination report for a root memory. MemoryGuard builds its descendant graph from stored parent lineage and can atomically:
+An operator can request a contamination report for a root memory. AgentInterdict builds its descendant graph from stored parent lineage and can atomically:
 
 - quarantine the root and all descendants;
 - force their mutable authority to `untrusted`;
@@ -111,7 +111,7 @@ The mode is stored in `schema_meta` with an HMAC signature:
 - `read_only`: runtime memory writes are blocked; guarded reads remain available.
 - `lockdown`: runtime writes are blocked and action checks fail closed.
 
-If the runtime-mode value/signature is directly altered, MemoryGuard reports the mode as invalid and behaves as `lockdown`.
+If the runtime-mode value/signature is directly altered, AgentInterdict reports the mode as invalid and behaves as `lockdown`.
 
 ## Cryptographic/integrity design
 

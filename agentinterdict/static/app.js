@@ -1,15 +1,15 @@
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let cache=[],statsCache={},systemCache={},licenseCache={};
-function apiKey(){return sessionStorage.getItem('memoryguardApiKey')||''}
-function operatorKey(){return sessionStorage.getItem('memoryguardOperatorKey')||''}
+function apiKey(){return sessionStorage.getItem('agentinterdictApiKey')||''}
+function operatorKey(){return sessionStorage.getItem('agentinterdictOperatorKey')||''}
 async function j(url,opt={},attempt={api:false,operator:false}){
   const headers={...(opt.headers||{})};
-  const k=apiKey(); if(k)headers['X-MemoryGuard-Key']=k;
-  if(opt.operator){const op=operatorKey();if(op)headers['X-MemoryGuard-Operator-Key']=op}
+  const k=apiKey(); if(k)headers['X-AgentInterdict-Key']=k;
+  if(opt.operator){const op=operatorKey();if(op)headers['X-AgentInterdict-Operator-Key']=op}
   const fetchOpt={...opt,headers}; delete fetchOpt.operator;
   const r=await fetch(url,fetchOpt); let d={}; try{d=await r.json()}catch{}
-  if(r.status===401&&!attempt.api){const entered=prompt('MemoryGuard API key required');if(entered){sessionStorage.setItem('memoryguardApiKey',entered);return j(url,opt,{...attempt,api:true})}}
-  if(r.status===403&&opt.operator&&!attempt.operator){const entered=prompt('Operator key required for this privileged action. Read it from .memoryguard-operator-key in the installation folder.');if(entered){sessionStorage.setItem('memoryguardOperatorKey',entered);return j(url,opt,{...attempt,operator:true})}}
+  if(r.status===401&&!attempt.api){const entered=prompt('AgentInterdict API key required');if(entered){sessionStorage.setItem('agentinterdictApiKey',entered);return j(url,opt,{...attempt,api:true})}}
+  if(r.status===403&&opt.operator&&!attempt.operator){const entered=prompt('Operator key required for this privileged action. Read it from .agentinterdict-operator-key in the installation folder.');if(entered){sessionStorage.setItem('agentinterdictOperatorKey',entered);return j(url,opt,{...attempt,operator:true})}}
   if(!r.ok)throw new Error(d.detail||`${r.status} ${r.statusText}`);return d
 }
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -22,7 +22,7 @@ async function refresh(){
   $('#stats').innerHTML=[['Total memories',stats.total],['Allowed',stats.allowed],['Needs review',stats.review],['Quarantined',stats.quarantined],['Average risk',stats.avg_risk]].map(([a,b])=>`<div class="stat"><small>${a}</small><strong>${b}</strong></div>`).join('');
   $('#reviewBadge').textContent=stats.review; $('#portLine').textContent=`Port ${sys.port}`; $('#modeLine').textContent=`Mode: ${(sys.runtime_mode?.mode||'unknown').replace('_',' ')}`; $('#planPill').textContent=(lic.plan||'community').toUpperCase();
   renderVault();renderOverview();renderReview();renderPosture();renderLicense();renderProdChecklist();
-  const u=location.origin; $('#hermesSnippet').textContent=`MEMORYGUARD_URL=${u}`;
+  const u=location.origin; $('#hermesSnippet').textContent=`AGENTINTERDICT_URL=${u}`;
  }catch(e){$('#health').textContent='● Degraded';$('#health').className='badtext';console.error(e)}
 }
 function renderOverview(){$('#overviewRows').innerHTML=cache.slice(0,8).map(m=>memoryRow(m,false)).join('')||'<tr><td colspan="6">No memories yet.</td></tr>'}
@@ -43,11 +43,11 @@ $('#verify').onclick=async()=>{try{let x=await j('/api/v1/integrity',{operator:t
 $('#backup').onclick=async()=>{try{let x=await j('/api/v1/backup?actor=dashboard',{method:'POST',operator:true});alert(`Backup created: ${x.path}`);await showAudit()}catch(e){alert(e.message)}}
 $('#setMode').onclick=async()=>{try{let mode=$('#runtimeMode').value;let x=await j('/api/v1/runtime-mode',{method:'POST',operator:true,headers:{'Content-Type':'application/json'},body:JSON.stringify({mode,actor:'dashboard',reason:'manual incident-response change'})});$('#incidentResult').textContent=`Runtime mode: ${x.mode}`;await refresh();await showAudit()}catch(e){$('#incidentResult').textContent=e.message}};
 $('#containMemory').onclick=async()=>{let id=Number($('#containId').value);if(!Number.isInteger(id)||id<=0){$('#incidentResult').textContent='Enter a valid memory ID';return}try{let report=await j(`/api/v1/memories/${id}/contamination`,{operator:true});if(!confirm(`Quarantine memory ${id} and ${report.descendant_ids.length} descendant(s)?`))return;let x=await j(`/api/v1/memories/${id}/contain?actor=dashboard&reason=incident%20containment`,{method:'POST',operator:true});$('#incidentResult').textContent=`Contained ${x.count} memory record(s)`;await refresh();await showAudit()}catch(e){$('#incidentResult').textContent=e.message}};
-function showView(v){$$('.view').forEach(x=>x.classList.remove('active'));$(`#view-${v}`).classList.add('active');$$('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===v));let map={overview:['Security Overview','Guard persistent state before it becomes future instruction.'],scan:['Scan & Ingest','Inspect a candidate before it enters long-term memory.'],action:['Action Firewall','Evaluate recalled memory combinations immediately before execution.'],vault:['Memory Vault','Inspect origin, authority, lineage and enforcement state.'],review:['Review Queue','Resolve ambiguous memory candidates without laundering authority.'],audit:['Audit & Integrity','Verify the history and immutable creation records.'],integrations:['Integrations','Put MemoryGuard in the write and retrieval paths of your agent.'],subscription:['Subscription & Entitlements','Cryptographically separate free capability from paid services.'],setup:['Setup & Documentation','Install, integrate, harden and understand the system.']};[$('#title').textContent,$('#subtitle').textContent]=map[v];if(v==='audit')showAudit()}
+function showView(v){$$('.view').forEach(x=>x.classList.remove('active'));$(`#view-${v}`).classList.add('active');$$('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===v));let map={overview:['Security Overview','Guard persistent state before it becomes future instruction.'],scan:['Scan & Ingest','Inspect a candidate before it enters long-term memory.'],action:['Action Firewall','Evaluate recalled memory combinations immediately before execution.'],vault:['Memory Vault','Inspect origin, authority, lineage and enforcement state.'],review:['Review Queue','Resolve ambiguous memory candidates without laundering authority.'],audit:['Audit & Integrity','Verify the history and immutable creation records.'],integrations:['Integrations','Put AgentInterdict in the write and retrieval paths of your agent.'],subscription:['Subscription & Entitlements','Cryptographically separate free capability from paid services.'],setup:['Setup & Documentation','Install, integrate, harden and understand the system.']};[$('#title').textContent,$('#subtitle').textContent]=map[v];if(v==='audit')showAudit()}
 $$('.nav').forEach(b=>b.onclick=()=>showView(b.dataset.view));$$('[data-jump]').forEach(b=>b.onclick=()=>showView(b.dataset.jump));$('#search').oninput=renderVault;$$('.copy').forEach(b=>b.onclick=async()=>{let el=$(`#${b.dataset.copy}`);try{await navigator.clipboard.writeText(el.textContent);let old=b.textContent;b.textContent='Copied';setTimeout(()=>b.textContent=old,900)}catch{}});
 fetch('/health',{cache:'no-store'}).then(async r=>{let x=await r.json();if(!r.ok||!x.ok)throw new Error('unhealthy');$('#health').textContent='● Healthy'}).catch(()=>{$('#health').textContent='● Offline/Degraded';$('#health').className='badtext'});refresh();
 
 function updateCredentialStatus(){const el=$('#credentialStatus');if(el)el.textContent=`API key: ${apiKey()?'loaded':'not loaded'} · Operator key: ${operatorKey()?'loaded':'not loaded'}`}
-const clearApi=$('#clearApiKey'); if(clearApi)clearApi.onclick=()=>{sessionStorage.removeItem('memoryguardApiKey');updateCredentialStatus()};
-const clearOp=$('#clearOperatorKey'); if(clearOp)clearOp.onclick=()=>{sessionStorage.removeItem('memoryguardOperatorKey');updateCredentialStatus()};
+const clearApi=$('#clearApiKey'); if(clearApi)clearApi.onclick=()=>{sessionStorage.removeItem('agentinterdictApiKey');updateCredentialStatus()};
+const clearOp=$('#clearOperatorKey'); if(clearOp)clearOp.onclick=()=>{sessionStorage.removeItem('agentinterdictOperatorKey');updateCredentialStatus()};
 updateCredentialStatus();

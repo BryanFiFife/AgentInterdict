@@ -54,22 +54,22 @@ def _community(source: str, reason: str, valid: bool = False) -> LicenseStatus:
 
 
 def _load_public_key() -> Ed25519PublicKey | None:
-    path = Path(os.getenv("MEMORYGUARD_LICENSE_PUBLIC_KEY_FILE", str(DEFAULT_PUBLIC_KEY))).expanduser()
+    path = Path(os.getenv("AGENTINTERDICT_LICENSE_PUBLIC_KEY_FILE", str(DEFAULT_PUBLIC_KEY))).expanduser()
     if not path.exists() or not path.is_file():
         return None
     if path.stat().st_size > 16_384:
         raise ValueError("license public key file is unexpectedly large")
     key = serialization.load_pem_public_key(path.read_bytes())
     if not isinstance(key, Ed25519PublicKey):
-        raise ValueError("MemoryGuard license public key is not Ed25519")
+        raise ValueError("AgentInterdict license public key is not Ed25519")
     return key
 
 
 def _read_token() -> tuple[str | None, str]:
-    direct = os.getenv("MEMORYGUARD_LICENSE_TOKEN", "").strip()
+    direct = os.getenv("AGENTINTERDICT_LICENSE_TOKEN", "").strip()
     if direct:
         return direct[:MAX_TOKEN_BYTES + 1], "environment"
-    p = Path(os.getenv("MEMORYGUARD_LICENSE_FILE", str(Path.home() / ".memoryguard" / "license.mglic"))).expanduser()
+    p = Path(os.getenv("AGENTINTERDICT_LICENSE_FILE", str(Path.home() / ".agentinterdict" / "license.mglic"))).expanduser()
     try:
         if p.exists() and p.is_file():
             if p.stat().st_size > MAX_TOKEN_BYTES:
@@ -92,10 +92,10 @@ def _parse_time(value: Any, field: str) -> datetime | None:
 
 
 def _installation_id() -> str | None:
-    direct = os.getenv("MEMORYGUARD_INSTALLATION_ID", "").strip()
+    direct = os.getenv("AGENTINTERDICT_INSTALLATION_ID", "").strip()
     if direct:
         return direct
-    install_file = Path.home() / ".memoryguard" / "installation_id"
+    install_file = Path.home() / ".agentinterdict" / "installation_id"
     try:
         if install_file.exists() and install_file.is_file() and install_file.stat().st_size < 1024:
             return install_file.read_text(encoding="utf-8").strip() or None

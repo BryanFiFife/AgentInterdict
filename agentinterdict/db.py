@@ -83,7 +83,7 @@ def _execute_schema_statements(con: sqlite3.Connection) -> None:
 def _connect_raw() -> sqlite3.Connection:
     global DB_PATH
     # Retain mutable DB_PATH for the test suite while making env-based runtime setup robust.
-    timeout = max(1, config.env_int("MEMORYGUARD_SQLITE_TIMEOUT", 10, 1, 60))
+    timeout = max(1, config.env_int("AGENTINTERDICT_SQLITE_TIMEOUT", 10, 1, 60))
     con = sqlite3.connect(DB_PATH, timeout=timeout, isolation_level=None, check_same_thread=False)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys=ON")
@@ -125,11 +125,11 @@ def _ensure_secret_binding(con: sqlite3.Connection) -> None:
     if not instance_id:
         instance_id = secrets.token_hex(16)
         con.execute("INSERT INTO schema_meta(key,value) VALUES('instance_id',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (instance_id,))
-    payload = {"purpose": "memoryguard-db-secret-check-v1", "instance_id": instance_id}
+    payload = {"purpose": "agentinterdict-db-secret-check-v1", "instance_id": instance_id}
     check = con.execute("SELECT value FROM schema_meta WHERE key='secret_check'").fetchone()
     if check and check[0]:
         if not verify_signature(payload, str(check[0])):
-            raise StorageError("MemoryGuard signing secret does not match this database; restore the original .memoryguard-secret/environment value before continuing")
+            raise StorageError("AgentInterdict signing secret does not match this database; restore the original .agentinterdict-secret/environment value before continuing")
     else:
         con.execute("INSERT INTO schema_meta(key,value) VALUES('secret_check',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (sign_record(payload),))
 
@@ -140,13 +140,13 @@ def _secret_binding_valid(con: sqlite3.Connection) -> bool:
     check = con.execute("SELECT value FROM schema_meta WHERE key='secret_check'").fetchone()
     if not instance or not instance[0] or not check or not check[0]:
         return False
-    payload = {"purpose": "memoryguard-db-secret-check-v1", "instance_id": str(instance[0])}
+    payload = {"purpose": "agentinterdict-db-secret-check-v1", "instance_id": str(instance[0])}
     return verify_signature(payload, str(check[0]))
 
 RUNTIME_MODES = {"normal", "read_only", "lockdown"}
 
 def _runtime_mode_payload(mode: str) -> dict:
-    return {"purpose": "memoryguard-runtime-mode-v1", "mode": mode}
+    return {"purpose": "agentinterdict-runtime-mode-v1", "mode": mode}
 
 def _ensure_runtime_mode(con: sqlite3.Connection) -> None:
     row = con.execute("SELECT value FROM schema_meta WHERE key='runtime_mode'").fetchone()
@@ -192,7 +192,7 @@ def _backup_before_migration() -> Path | None:
     dest_dir = config.backup_dir()
     dest_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    dest = dest_dir / f"memoryguard-pre-migration-{stamp}.db"
+    dest = dest_dir / f"agentinterdict-pre-migration-{stamp}.db"
     source = target = verify = None
     try:
         source = sqlite3.connect(DB_PATH, timeout=5)
@@ -272,7 +272,7 @@ def connect(*, write: bool = False):
     """Open a SQLite transaction with clear busy/corruption classification.
 
     A process-level lock serialises writes; WAL still permits concurrent readers. SQLite's
-    own busy timeout protects against a second MemoryGuard process or backup operation.
+    own busy timeout protects against a second AgentInterdict process or backup operation.
     """
     lock = _LOCK if write else _NullLock()
     with lock:
@@ -288,7 +288,7 @@ def connect(*, write: bool = False):
                 except sqlite3.DatabaseError: pass
             msg = str(exc).lower()
             if "locked" in msg or "busy" in msg:
-                raise StorageBusyError("MemoryGuard storage is temporarily busy; retry the operation") from exc
+                raise StorageBusyError("AgentInterdict storage is temporarily busy; retry the operation") from exc
             raise StorageError(f"SQLite operational error: {exc}") from exc
         except sqlite3.DatabaseError as exc:
             if con is not None:
@@ -296,7 +296,7 @@ def connect(*, write: bool = False):
                 except sqlite3.DatabaseError: pass
             msg = str(exc).lower()
             if "malformed" in msg or "corrupt" in msg or "not a database" in msg:
-                raise StorageCorruptionError(f"MemoryGuard database corruption detected: {exc}") from exc
+                raise StorageCorruptionError(f"AgentInterdict database corruption detected: {exc}") from exc
             raise StorageError(f"SQLite database error: {exc}") from exc
         except Exception:
             if con is not None:
@@ -332,7 +332,7 @@ def backup_database(label: str = "manual") -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     safe_label = "".join(c for c in label if c.isalnum() or c in "-_" )[:40] or "manual"
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    dest = dest_dir / f"memoryguard-{safe_label}-{stamp}.db"
+    dest = dest_dir / f"agentinterdict-{safe_label}-{stamp}.db"
     try:
         with _LOCK:
             source = _connect_raw()
@@ -403,7 +403,7 @@ def diagnostics() -> dict:
         if not secret_binding_ok:
             result["error"] = "configured signing secret does not match database binding"
         elif not runtime["valid"]:
-            result["error"] = "runtime mode signature is invalid; MemoryGuard is fail-closed in lockdown"
+            result["error"] = "runtime mode signature is invalid; AgentInterdict is fail-closed in lockdown"
     except StorageError as exc:
         result["error"] = str(exc)
     return result

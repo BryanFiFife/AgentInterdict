@@ -1,4 +1,4 @@
-# MemoryGuard v0.4 threat model
+# AgentInterdict v0.4 threat model
 
 ## Assets
 
@@ -69,10 +69,10 @@
 ## Trust assumptions
 
 - The host OS/process is not fully compromised.
-- The MemoryGuard HMAC/operator secrets are inaccessible to the ordinary runtime agent.
-- Persistent writes that matter are routed through MemoryGuard.
+- The AgentInterdict HMAC/operator secrets are inaccessible to the ordinary runtime agent.
+- Persistent writes that matter are routed through AgentInterdict.
 - Consequential agent integrations call `action-check` before execution.
-- Host tool permissions/approval remain active after MemoryGuard allows an action.
+- Host tool permissions/approval remain active after AgentInterdict allows an action.
 - Vendor private entitlement keys remain vendor-side.
 
 ## Fail-closed behavior
@@ -87,11 +87,11 @@
 
 ## Out of scope / remaining limits
 
-- Root/admin compromise of the host that exposes MemoryGuard secrets
+- Root/admin compromise of the host that exposes AgentInterdict secrets
 - Formal proof that static/combined scoring detects every semantic attack
 - Full semantic intent proof beyond deterministic signed action-scope matching
 - Durable prepare/commit authorization consumption needed to prevent semantic replay/exactly-once failures
-- Guaranteed deletion from copies outside MemoryGuard, vector stores, caches or backups
+- Guaranteed deletion from copies outside AgentInterdict, vector stores, caches or backups
 - Multi-node/tenant isolation in the SQLite build
 - Protection if an integration intentionally skips the action firewall
 - Protection against malicious host tools after they are independently authorized
@@ -100,7 +100,7 @@
 
 ## Recommended host policy
 
-Treat MemoryGuard as one layer in a zero-trust agent stack:
+Treat AgentInterdict as one layer in a zero-trust agent stack:
 
 1. Run it under a separate service account/container where possible.
 2. Give runtime agents only ordinary API capability.

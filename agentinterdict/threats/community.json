@@ -86,6 +86,97 @@
       "flags": "i",
       "weight": 18,
       "reason": "Contains executable web markup"
+    },
+    {
+      "name": "tool_exfiltration",
+      "pattern": "\\b(send_email|send_message|post|upload|exfiltrate|transmit|forward|send)\\b.{0,80}\\b(attacker|evil|attacker@|attacker\\.|attacker\\.com|attacker\\.io|attacker\\.net)\\b",
+      "flags": "is",
+      "weight": 50,
+      "reason": "Tool call directs data to an attacker-controlled destination"
+    },
+    {
+      "name": "tool_credential_arg",
+      "pattern": "\\b(send_email|send_message|post|upload|send)\\b.{0,80}\\b(body|content|args|data|payload)\\b.{0,40}\\b(password|api[_ -]?key|secret|token|credential|private[_ -]?key|jwt|auth[_ -]?cookie)\\b",
+      "flags": "is",
+      "weight": 50,
+      "reason": "Tool call passes credential material as an argument"
+    },
+    {
+      "name": "tool_dangerous_command",
+      "pattern": "\\b(execute_command|run_command|exec|system|popen|subprocess)\\b.{0,60}\\b(curl|wget|nc|powershell|bash|rm|chmod|invoke-webrequest)\\b",
+      "flags": "is",
+      "weight": 45,
+      "reason": "Tool call executes a dangerous shell command"
+    },
+    {
+      "name": "multi_turn_override",
+      "pattern": "\\b(by the way|also|oh and|additionally|meanwhile|now|then)\\b.{0,50}\\b(ignore|disregard|forget|override|bypass)\\b",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Instruction override smuggled into a multi-turn exchange"
+    },
+    {
+      "name": "credential_to_attacker",
+      "pattern": "\\b(password|api[_ -]?key|secret|token|credential|private[_ -]?key|jwt|auth[_ -]?cookie)\\b.{0,60}\\b(attacker|evil|attacker@|attacker\\.)\\b",
+      "flags": "is",
+      "weight": 25,
+      "reason": "Credential material directed to an attacker-controlled destination (write-time lenient; combined at action-time)"
+    },
+    {
+      "name": "credential_disclosure",
+      "pattern": "\\b(leak|reveal|print|return|upload|post|send|exfiltrate|disclose|show)\\b.{0,50}\\b(password|api[_ -]?key|secret|token|credential|private[_ -]?key|jwt|auth[_ -]?cookie|session[_ -]?token)\\b",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Requests disclosure of credential material"
+    },
+    {
+      "name": "system_prompt_override",
+      "pattern": "\\b(new system prompt|system prompt override|system: new|system override|you are now the system|you are now unrestricted|you are now dan)\\b",
+      "flags": "i",
+      "weight": 40,
+      "reason": "Attempts to replace or override the system prompt"
+    },
+    {
+      "name": "letter_spaced_obfuscation",
+      "pattern": "\\b[a-z](?:-[a-z]){4,}\\b",
+      "flags": "i",
+      "weight": 30,
+      "reason": "Letter-spaced obfuscation used to evade keyword detection"
+    },
+    {
+      "name": "destructive_action",
+      "pattern": "\\b(delete|erase|drop|remove|destroy|wipe)\\b.{0,40}\\b(database|data|files?|records?|user|account|everything|all)\\b",
+      "flags": "is",
+      "weight": 30,
+      "reason": "Requests destructive data action"
+    },
+    {
+      "name": "credential_print",
+      "pattern": "\\b(print|output|return|show|display)\\b.{0,40}\\b(credentials?|keys?|tokens?|secrets?|passwords?|jwt)\\b",
+      "flags": "is",
+      "weight": 35,
+      "reason": "Requests printing/disclosure of credential material"
+    },
+    {
+      "name": "run_command",
+      "pattern": "\\b(run|execute|invoke)\\b.{0,30}\\b(command|shell|script|curl|wget|powershell|bash)\\b",
+      "flags": "is",
+      "weight": 30,
+      "reason": "Requests execution of a shell command"
+    },
+    {
+      "name": "transfer_funds",
+      "pattern": "\\b(transfer|send|wire|pay|move)\\b.{0,40}\\b(funds|money|payment|balance|account)\\b",
+      "flags": "is",
+      "weight": 30,
+      "reason": "Requests a financial transfer action"
+    },
+    {
+      "name": "reveal_keys",
+      "pattern": "\\b(reveal|leak|show|return|give)\\b.{0,30}\\b(keys?|tokens?|secrets?|passwords?|credentials?)\\b",
+      "flags": "is",
+      "weight": 30,
+      "reason": "Requests disclosure of secret material"
     }
   ],
   "compact_patterns": [

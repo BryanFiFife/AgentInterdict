@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "updated_at": "2026-08-11T00:00:00Z",
+  "tier": "community",
+  "signals": [
+    {
+      "name": "private_key_material",
+      "pattern": "-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----",
+      "flags": "i",
+      "weight": 100,
+      "reason": "Contains private-key material that must not be persisted in agent memory"
+    },
+    {
+      "name": "known_api_token",
+      "pattern": "\\b(?:sk-(?:proj-)?[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{20,})\\b",
+      "flags": "",
+      "weight": 85,
+      "reason": "Contains a credential-shaped API/access token"
+    },
+    {
+      "name": "bearer_or_jwt",
+      "pattern": "(?:\\bBearer\\s+[A-Za-z0-9._~+/-]{24,}={0,2}\\b)|(?:\\beyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{8,}\\b)",
+      "flags": "i",
+      "weight": 65,
+      "reason": "Contains bearer/JWT credential material"
+    },
+    {
+      "name": "credential_assignment",
+      "pattern": "\\b(?:password|passwd|api[_ -]?key|secret|access[_ -]?token|refresh[_ -]?token)\\s*[:=]\\s*['\\\"]?[^\\s'\\\"]{16,}",
+      "flags": "i",
+      "weight": 55,
+      "reason": "Contains an inline credential assignment"
+    },
+    {
+      "name": "instruction_override",
+      "pattern": "\\b(ignore|disregard|forget|override|bypass)\\b.{0,55}\\b(previous|prior|system|developer|instructions?|rules?|policy)\\b",
+      "flags": "is",
+      "weight": 35,
+      "reason": "Attempts to override higher-priority instructions"
+    },
+    {
+      "name": "role_impersonation",
+      "pattern": "\\b(system message|developer message|you are now|act as|role\\s*:|new system prompt)\\b",
+      "flags": "i",
+      "weight": 22,
+      "reason": "Looks like role/instruction impersonation"
+    },
+    {
+      "name": "secret_exfiltration",
+      "pattern": "(?:\\b(api[_ -]?keys?|passwords?|secrets?|tokens?|credentials?|private keys?|auth cookies?)\\b.{0,100}\\b(send|post|upload|exfiltrate|reveal|return|forward|transmit)\\b)|(?:\\b(send|post|upload|exfiltrate|reveal|return|forward|transmit)\\b.{0,100}\\b(api[_ -]?keys?|passwords?|secrets?|tokens?|credentials?|private keys?|auth cookies?)\\b)",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Requests credential or secret disclosure"
+    },
+    {
+      "name": "dangerous_action",
+      "pattern": "\\b(delete|erase|drop|transfer|wire|pay|purchase|send\\s+(?:an?\\s+)?email|execute|run\\s+(?:a\\s+)?command|shell|powershell|curl|wget|chmod|reg\\s+delete)\\b",
+      "flags": "i",
+      "weight": 18,
+      "reason": "Contains consequential action language"
+    },
+    {
+      "name": "persistence_language",
+      "pattern": "\\b(remember|store this|save this|from now on|always|permanently|future sessions?|long[- ]term memory)\\b",
+      "flags": "i",
+      "weight": 12,
+      "reason": "Explicit persistence request"
+    },
+    {
+      "name": "hidden_instruction",
+      "pattern": "\\b(hidden instruction|do not tell the user|silently|without telling|covertly|keep this secret from)\\b",
+      "flags": "i",
+      "weight": 28,
+      "reason": "Requests concealed behavior"
+    },
+    {
+      "name": "encoded_payload",
+      "pattern": "(?:[A-Za-z0-9+/_-]{80,}={0,2})|(?:(?:\\\\x|%)[0-9a-fA-F]{2}){8,}",
+      "flags": "",
+      "weight": 16,
+      "reason": "Contains a large encoded/obfuscated payload"
+    },
+    {
+      "name": "html_injection",
+      "pattern": "<(script|iframe|object|embed)\\b|javascript:",
+      "flags": "i",
+      "weight": 18,
+      "reason": "Contains executable web markup"
+    }
+  ],
+  "compact_patterns": [
+    {
+      "name": "compact_override",
+      "pattern": "(?:ignore|disregard|forget|override)(?:all)?(?:previous|prior|system|developer)(?:instructions?|rules?|prompt)",
+      "flags": "",
+      "weight": 30,
+      "reason": "Instruction override survives whitespace/punctuation removal"
+    },
+    {
+      "name": "compact_exfiltration",
+      "pattern": "(?:send|upload|reveal|exfiltrate).{0,40}(?:apikey|password|secret|token|credential|privatekey)",
+      "flags": "",
+      "weight": 30,
+      "reason": "Secret-exfiltration language survives obfuscation normalization"
+    }
+  ]
+}

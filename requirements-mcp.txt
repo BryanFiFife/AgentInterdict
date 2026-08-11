@@ -1,0 +1,2 @@
+-r requirements.txt
+mcp[cli]>=2,<3

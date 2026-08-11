@@ -1,77 +1,102 @@
-# MemoryGuard v0.4
+<div align="center">
 
-MemoryGuard is a local security gateway for persistent AI-agent memory. It sits between an agent and long-term memory, binds authority to origin, scores suspicious content, blocks definite credential material from persistence, quarantines likely poisoning, preserves provenance, evaluates recalled memory combinations at action time, and supports incident containment and rollback.
+# 🛡️ MemoryGuard
 
-> **Security claim:** MemoryGuard reduces and contains persistent-memory risk. It does not make prompt injection impossible and it is not a substitute for host permissions, least privilege, sandboxing, or independent human approval for high-impact actions.
+### The local security gateway for AI-agent memory
 
-## What is new in v0.4
+MemoryGuard sits between your agent and its long-term memory. It **binds authority to origin**, **blocks credential leakage**, **quarantines prompt-injection poisoning**, and **evaluates recalled memory at action time** — so your agent's memory can't be weaponised against it.
 
-- **Action-time memory firewall**: re-evaluates the actual recalled bundle before a tool action. High/critical actions require direct, sealed, authoritative human/system authorization memories with immutable signed action scopes.
-- **Compositional-attack detection**: individually benign records are joined and rescored immediately before execution to catch split L2-style payloads.
-- **Secret-material guard**: private keys, recognized API/access tokens, bearer/JWT credentials and explicit long credential assignments are rejected before they can be written to persistent memory. Only a content hash and signal names are audited.
-- **Scan-only endpoint**: inspect a candidate without persisting it.
-- **Blast-radius containment**: map all descendants of a suspect memory and quarantine the entire derivation chain atomically.
-- **Signed runtime modes**: `normal`, `read_only`, and fail-closed `lockdown`; direct database tampering with the mode is detected.
-- **Agent integration support** for action checks through MCP, Hermes, OpenClaw CLI/skill, and generic REST.
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-Commercial-blueviolet?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-4f8cff?style=for-the-badge)](#)
+[![CI](https://img.shields.io/github/actions/workflow/status/BryanFiFife/MemoryGuard/ci.yml?style=for-the-badge&label=CI&logo=github)](https://github.com/BryanFiFife/MemoryGuard/actions)
+[![Stars](https://img.shields.io/github/stars/BryanFiFife/MemoryGuard?style=for-the-badge&logo=github&color=gold)](https://github.com/BryanFiFife/MemoryGuard)
+[![Forks](https://img.shields.io/github/forks/BryanFiFife/MemoryGuard?style=for-the-badge&logo=github)](https://github.com/BryanFiFife/MemoryGuard)
 
-## Existing security controls
+**Free forever · Local-first · Fail-closed**
 
-- REST API + browser security console
-- Origin-bound authority: `untrusted`, `observed`, `verified`, `authoritative`
-- External sources non-authoritative by default
-- Derived content cannot outrank its least-trusted parent and is capped below authoritative
-- Automatic allow/review/quarantine decisions
-- Human review and constrained authority promotion
-- Parent lineage and compact origin-root propagation
-- Namespace isolation and expiry
-- Guarded retrieval with `safe_for_action` and a security envelope
-- SHA-256 content hashing
-- HMAC-signed immutable creation records
-- HMAC-signed mutable enforcement state
-- Keyed, hash-chained audit events
-- Idempotent retry protection
-- Atomic revision/rollback paths
-- SQLite foreign keys, integrity diagnostics, WAL and verified backups
-- Database-to-signing-secret binding
-- API/operator privilege separation
-- Ed25519 paid-entitlement verification
-- Self-install bundle for automated agents
+</div>
 
-## Quick start on Windows
+---
 
-Unzip the complete folder and run:
+## ✨ Why MemoryGuard?
+
+AI agents persist memory — and that memory is a **prime attack surface**. A single poisoned memory can make an agent leak secrets, ignore instructions, or take destructive actions. MemoryGuard is a **local, transparent gateway** that sits between your agent and its memory store and enforces six security invariants:
+
+| Invariant | What it means |
+|---|---|
+| 🔐 **Origin-bound authority** | Derived content can never outrank its source. External sources are non-authoritative by default. |
+| 🚫 **No derivation amplification** | A recalled bundle can't gain authority it never had. |
+| 🔍 **Retrieval ≠ permission** | Reading a memory doesn't authorise acting on it. |
+| ⚡ **Action-time re-scoring** | The actual recalled bundle is re-scored *before* a tool action. |
+| 🔑 **Credentials-not-memory** | Private keys, API tokens, JWTs and credential assignments are **rejected before persistence**. |
+| 🧱 **Fail-closed tampering** | Direct DB tampering is detected; runtime flips to `lockdown`. |
+
+> **Security claim:** MemoryGuard reduces and contains persistent-memory risk. It does not make prompt injection impossible and is not a substitute for host permissions, least-trust, sandboxing, or independent human approval for high-impact actions.
+
+---
+
+## 🚀 Quick start (Windows)
 
 ```text
-run_windows.bat
+1. Download your package (see below)
+2. Unzip the folder
+3. Double-click run_windows.bat
+4. Open http://127.0.0.1:43847
 ```
 
-The preferred dashboard port is **43847**. If it is occupied and the port was not explicitly forced, the installer selects a documented uncommon fallback without killing another process.
+The installer verifies Python, initialises the database, runs diagnostics, picks a safe port, and prepares the Hermes / OpenClaw / MCP / REST integration for you.
 
-Open:
+**Agent-assisted install:** copy the prompt in [`INSTALL_WITH_AGENT.txt`](INSTALL_WITH_AGENT.txt) and give it to your installation agent.
 
-```text
-http://127.0.0.1:<selected-port>
-http://127.0.0.1:<selected-port>/docs
-```
+---
 
-The selected port is written to `.memoryguard-port`.
+## 📦 Download
 
-## Agent-assisted installation
+All packages are built from this repository. **One source, one download.**
 
-Keep the extracted folder intact, copy its absolute directory, and give your installation agent the prompt in:
+| Tier | Download | Threat feed | Remote features |
+|---|---|---|---|
+| **Community** · Free | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | Static (baked-in) | — |
+| **Pro** · £79/mo | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ Advanced classifier, reputation feed |
+| **Business** · £349/mo | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + Policy packs, compliance packs, model hardening |
+| **Enterprise** · £1,500/mo | [⬇️ Download](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) | ✅ Weekly-updated | ✅ + CVE advisory feed, anomaly detection, remote audit |
 
-```text
-INSTALL_WITH_AGENT.txt
-```
+> **How it works:** the code is free and open to download. Paid tiers unlock **remotely-controlled features** — the updated threat feed, hosted classifiers, policy packs and more — which are served from the MemoryGuard control plane and gated by your **signed licence lease**. Your agent presents its lease; the control plane verifies it cryptographically and serves the features your plan includes.
 
-The installer verifies Python and dependency security floors, initializes/migrates the database, performs backups, runs diagnostics and tests, chooses a safe port, and prepares the appropriate Hermes/OpenClaw/MCP/REST integration.
+---
 
-After installation, an ordinary runtime agent should receive only the MemoryGuard URL and ordinary API capability. It should **not** receive `.memoryguard-secret`, `.memoryguard-operator-key`, vendor signing keys, or direct database access.
+## 🎚️ Feature comparison
 
-## Runtime integration pattern
+| Feature | Community | Pro | Business | Enterprise |
+|---|:---:|:---:|:---:|:---:|
+| Origin-bound local gateway | ✅ | ✅ | ✅ | ✅ |
+| Static transparent risk rules | ✅ | ✅ | ✅ | ✅ |
+| Single-operator GUI | ✅ | ✅ | ✅ | ✅ |
+| Local audit & integrity verification | ✅ | ✅ | ✅ | ✅ |
+| Basic REST API | ✅ | ✅ | ✅ | ✅ |
+| **Weekly-updated threat feed** | — | ✅ | ✅ | ✅ |
+| **Hosted advanced semantic classifier** | — | ✅ | ✅ | ✅ |
+| **Remote IP/domain/URL reputation feed** | — | ✅ | ✅ | ✅ |
+| Hermes / MCP managed integration packs | — | ✅ | ✅ | ✅ |
+| Audit export & reporting | — | ✅ | ✅ | ✅ |
+| **Curated policy packs** | — | — | ✅ | ✅ |
+| **Compliance packs** (GDPR/HIPAA/SOC2/ISO27001) | — | — | ✅ | ✅ |
+| **Model-specific hardening** (Claude/GPT/Llama) | — | — | ✅ | ✅ |
+| Multi-agent / multi-namespace management | — | — | ✅ | ✅ |
+| Team accounts & RBAC | — | — | ✅ | ✅ |
+| **CVE advisory feed** | — | — | — | ✅ |
+| **Hosted anomaly detection** | — | — | — | ✅ |
+| **Centralised remote audit dashboard** | — | — | — | ✅ |
+| SSO / SAML | — | — | — | ✅ |
+| Signed offline leases | — | — | — | ✅ |
+| SLA & priority support | — | — | — | ✅ |
+
+---
+
+## 🧠 How it works
 
 ### Write path
-
 ```text
 agent/tool/web/email
         |
@@ -85,7 +110,6 @@ agent/tool/web/email
 ```
 
 ### Read + action path
-
 ```text
 agent recall
    |
@@ -99,53 +123,76 @@ recalled memory bundle + proposed action
 POST /api/v1/action-check
    |
    +--> compositional poison / invalid lineage / lockdown -> BLOCK
-   +--> high/critical without direct matching action-scoped human/system authority -> BLOCK
+   +--> high/critical without direct matching action-scoped authority -> BLOCK
    +--> passes policy -> ALLOW (host permissions still apply)
 ```
 
-Important endpoints:
-
+### Key endpoints
 ```text
-POST /api/v1/scan
-POST /api/v1/memories
-POST /api/v1/search
-POST /api/v1/action-check
-GET  /api/v1/stats
+POST /api/v1/scan          # inspect a candidate without persisting
+POST /api/v1/memories      # write a memory through the gate
+POST /api/v1/search        # guarded retrieval
+POST /api/v1/action-check  # action-time firewall
+GET  /api/v1/stats         # gateway statistics
 ```
 
-Operator-only endpoints include full-vault access, review, authority changes, revisions, rollback, contamination reports, containment, runtime-mode changes, audit history, deep integrity, and backup.
+---
 
-## Incident response
+## 🧰 Integrations
+
+- **Hermes** — [`integrations/hermes/memoryguard/`](integrations/hermes/memoryguard/)
+- **OpenClaw** — [`agent_install/openclaw-skill/`](agent_install/openclaw-skill/)
+- **MCP** — [`integrations/mcp/server.py`](integrations/mcp/server.py)
+- **Generic REST** — [`examples/client.py`](examples/client.py)
+
+---
+
+## 📚 Documentation
+
+| Doc | Purpose |
+|---|---|
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Technical architecture & invariants |
+| [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | Assets, adversaries, controls & gaps |
+| [`docs/INSTALL_WINDOWS.md`](docs/INSTALL_WINDOWS.md) | Windows install guide |
+| [`docs/INSTALL_DOCKER.md`](docs/INSTALL_DOCKER.md) | Docker install guide |
+| [`docs/HERMES_INTEGRATION.md`](docs/HERMES_INTEGRATION.md) | Hermes integration |
+| [`docs/OPENCLAW_INTEGRATION.md`](docs/OPENCLAW_INTEGRATION.md) | OpenClaw integration |
+| [`docs/ERROR_RECOVERY.md`](docs/ERROR_RECOVERY.md) | Operational contingencies |
+| [`LITERATURE.md`](LITERATURE.md) | Research & standards map |
+
+---
+
+## 🛡️ Incident response
 
 If poisoning or tampering is suspected:
 
-1. Set runtime mode to `lockdown` to stop runtime writes and make action checks fail closed.
+1. Set runtime mode to `lockdown` — stops writes, action checks fail closed.
 2. Run deep integrity verification.
 3. Use the contamination report on the suspect root memory.
 4. Atomically contain the root plus descendants.
-5. Review audit history and restore/revise from a known-good state.
-6. Return to `read_only` for observation, then `normal` only after remediation.
+5. Review audit history and restore from a known-good state.
+6. Return to `read_only` for observation, then `normal` after remediation.
 
-## Subscription architecture
+---
 
-The customer build contains only public verification material for paid entitlements. Vendor private signing keys stay in the vendor control plane. A patched local GUI cannot create a cryptographically valid entitlement, and premium hosted services should independently verify subscription state server-side.
+## 🔒 Security posture
 
-No locally distributed application can be literally uncrackable. The commercial strategy is to keep high-value threat intelligence, cloud classifiers, policy feeds, managed reporting, and other premium services on infrastructure controlled by the vendor.
+- **No secrets in this repo.** The customer build ships only the public verification key. Vendor private signing keys, Stripe keys, and control-plane secrets live on the vendor's infrastructure — never in this repository.
+- **Fail-closed everywhere.** Tampering, invalid lineage, and lockdown all block by default.
+- **Privilege separation.** Operator vs. ordinary runtime API keys are distinct.
 
-## Literature and threat model
+---
 
-- `LITERATURE.md` — research and standards map
-- `ARCHITECTURE.md` — technical architecture and invariants
-- `docs/THREAT_MODEL.md` — assets, adversaries, controls and remaining gaps
-- `docs/ERROR_RECOVERY.md` — operational contingencies
-- `docs/AGENT_SELF_INSTALL.md` — one-folder automated deployment
-- `RELEASE_NOTES_v0.4.md` — release changes and validation
-- `scripts/verify_release.py` — verify packaged SHA-256 manifest after extraction
+## 📄 License
 
-## Name/affiliation notice
+MemoryGuard is **free for Community use** and commercially licensed for Pro, Business, and Enterprise tiers. See the [LICENSE](LICENSE) for terms.
 
-OWASP currently has an open-source project named **OWASP Agent Memory Guard**. MemoryGuard is not affiliated with or endorsed by OWASP. Before a public commercial launch, perform trademark/name clearance and consider a more distinctive commercial brand if counsel or market testing suggests confusion risk.
+---
 
-## Production limitations
+<div align="center">
 
-v0.4 remains a hardened single-node security MVP, not a formally verified enterprise appliance. Before making strong enterprise assurances, add production tenant/RBAC architecture, Postgres isolation, KMS/HSM-backed keys, TLS termination, remote/WORM audit anchoring, distributed rate/abuse controls, SBOM/signing/CI supply-chain controls, benchmark coverage against public memory-poisoning corpora, and independent penetration/red-team review.
+**Built with ❤️ for safer AI agents**
+
+[⬇️ Download Community](https://github.com/BryanFiFife/MemoryGuard/archive/refs/heads/main.zip) · [⭐ Star this repo](https://github.com/BryanFiFife/MemoryGuard) · [🐛 Report an issue](https://github.com/BryanFiFife/MemoryGuard/issues)
+
+</div>

@@ -221,6 +221,51 @@ class ScanRequest(BaseModel):
     source_type: SourceType = "unknown_external"
 
 
+class CodeChangeRequest(BaseModel):
+    """Optional code-change review gate.
+
+    Scans a code diff (or a code-change description) with the same engine used
+    for memory content, and writes a signed, tamper-evident evidence record of
+    the verdict. This is an OPTIONAL layer: it reuses the existing scanning and
+    audit infrastructure to govern AI-generated code changes, without changing
+    any existing enforcement behavior.
+    """
+    diff: str = Field(min_length=1, max_length=DEFAULT_MAX_CONTENT)
+    repo: str = Field(default="", max_length=4096)
+    branch: str = Field(default="", max_length=4096)
+    actor: str = Field(default="agent", min_length=1, max_length=160)
+    namespace: str = "default"
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("namespace")
+    @classmethod
+    def valid_code_namespace(cls, value: str) -> str:
+        value = value.strip()
+        if not _NAMESPACE.fullmatch(value):
+            raise ValueError("invalid namespace")
+        return value
+
+    @field_validator("actor")
+    @classmethod
+    def valid_code_actor(cls, value: str) -> str:
+        value = value.strip()
+        if not _ACTOR.fullmatch(value):
+            raise ValueError("actor contains invalid control characters or is too long")
+        return value
+
+    @field_validator("metadata")
+    @classmethod
+    def bounded_code_metadata(cls, value: dict[str, Any]) -> dict[str, Any]:
+        _validate_metadata_shape(value)
+        try:
+            encoded = json.dumps(value, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+        except (TypeError, ValueError, RecursionError) as exc:
+            raise ValueError("metadata must be JSON-serializable and contain no NaN/Infinity") from exc
+        if len(encoded.encode("utf-8")) > DEFAULT_MAX_METADATA_BYTES:
+            raise ValueError(f"metadata exceeds {DEFAULT_MAX_METADATA_BYTES} bytes")
+        return value
+
+
 class ActionCheckRequest(BaseModel):
     action: str = Field(min_length=1, max_length=4000)
     action_risk: Literal["low", "medium", "high", "critical"] = "medium"

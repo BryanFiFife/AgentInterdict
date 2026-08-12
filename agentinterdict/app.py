@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from . import config, db, service
 from .errors import ConflictError, IntegrityError, AgentInterdictError, StorageBusyError, StorageCorruptionError, StorageError, ValidationError
 from .licensing import get_license_status
-from .models import ActionCheckRequest, IngestRequest, PromoteRequest, ReviewRequest, ReviseRequest, RuntimeModeRequest, ScanRequest, SearchRequest
+from .models import ActionCheckRequest, CodeChangeRequest, IngestRequest, PromoteRequest, ReviewRequest, ReviseRequest, RuntimeModeRequest, ScanRequest, SearchRequest
 from .security import DEMO_SECRET, signing_secret_status
 
 log = logging.getLogger("agentinterdict")
@@ -174,6 +174,13 @@ def license_status():
 @app.post("/api/v1/scan")
 def scan(req: ScanRequest):
     return service.scan_candidate(**req.model_dump())
+
+
+@app.post("/api/v1/code-change")
+def code_change(req: CodeChangeRequest):
+    """Optional code-change review gate. Scans a diff and records a signed
+    evidence verdict. Does not block anything by itself."""
+    return service.review_code_change(**req.model_dump())
 
 
 @app.post("/api/v1/action-check")

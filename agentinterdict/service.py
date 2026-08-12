@@ -11,7 +11,7 @@ from pydantic import ValidationError as PydanticValidationError
 
 from . import db
 from .errors import ConflictError, IntegrityError, ValidationError
-from .models import ActionCheckRequest, IngestRequest, PromoteRequest, ReviewRequest, ReviseRequest, RuntimeModeRequest, ScanRequest, SearchRequest
+from .models import ActionCheckRequest, CodeChangeRequest, IngestRequest, PromoteRequest, ReviewRequest, ReviseRequest, RuntimeModeRequest, ScanRequest, SearchRequest
 from .policy import AUTHORITY_ORDER, base_authority, decision_for, inherited_authority, safe_for_action
 from .security import (
     canonical_json,
@@ -765,6 +765,57 @@ def scan_candidate(*, content: str, source_type: str = "unknown_external"):
         "sensitive_secret": contains_sensitive_secret(result),
         "would_persist": not contains_definite_secret(result),
         "recommended_status": "rejected" if contains_definite_secret(result) else decision_for(result.score, base_authority(req.source_type)),
+    }
+
+
+def review_code_change(*, diff: str, repo: str = "", branch: str = "", actor: str = "agent",
+                       namespace: str = "default", metadata: dict | None = None):
+    """Optional code-change review gate.
+
+    Scans a code diff with the same engine used for memory content and writes a
+    signed, tamper-evident audit record of the verdict. This is an OPTIONAL
+    layer that reuses the existing scanning + audit infrastructure to govern
+    AI-generated code changes. It does NOT change any existing enforcement
+    behavior and does NOT block anything by itself — it produces an evidence
+    record a caller can act on.
+    """
+    try:
+        req = CodeChangeRequest.model_validate({
+            "diff": diff, "repo": repo, "branch": branch, "actor": actor,
+            "namespace": namespace, "metadata": metadata or {},
+        })
+    except PydanticValidationError as exc:
+        raise ValidationError(str(exc)) from exc
+
+    result = score_content(req.diff, "tool")
+    verdict = "quarantined" if contains_definite_secret(result) else decision_for(result.score, "untrusted")
+    diff_hash = content_hash(req.diff)
+
+    with db.connect(write=True) as con:
+        _audit(con, "code_change.reviewed", None, req.actor, {
+            "diff_hash": diff_hash,
+            "repo": req.repo,
+            "branch": req.branch,
+            "namespace": req.namespace,
+            "risk_score": result.score,
+            "risk_severity": result.severity,
+            "signals": result.signals,
+            "verdict": verdict,
+            "metadata": req.metadata,
+        })
+
+    return {
+        "diff_hash": diff_hash,
+        "repo": req.repo,
+        "branch": req.branch,
+        "namespace": req.namespace,
+        "risk_score": result.score,
+        "risk_severity": result.severity,
+        "signals": result.signals,
+        "verdict": verdict,
+        "definite_secret": contains_definite_secret(result),
+        "sensitive_secret": contains_sensitive_secret(result),
+        "evidence_recorded": True,
     }
 
 

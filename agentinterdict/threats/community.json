@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "updated_at": "2026-08-11T00:00:00Z",
+  "version": 2,
+  "updated_at": "2026-08-12T00:00:00Z",
   "tier": "community",
   "signals": [
     {
@@ -177,6 +177,146 @@
       "flags": "is",
       "weight": 30,
       "reason": "Requests disclosure of secret material"
+    },
+    {
+      "name": "jailbreak_framing",
+      "pattern": "\\b(dan mode|jailbreak|unfiltered|uncensored|no restrictions|no limits|unrestricted mode|developer mode)\\b",
+      "flags": "i",
+      "weight": 40,
+      "reason": "Requests jailbreak/unrestricted framing"
+    },
+    {
+      "name": "indirect_injection",
+      "pattern": "\\b(ignore the text above|ignore everything above|the following is a system message|new instructions follow|disregard the previous text)\\b",
+      "flags": "is",
+      "weight": 45,
+      "reason": "Indirect prompt injection embedded in retrieved content"
+    },
+    {
+      "name": "markdown_injection",
+      "pattern": "!\\[[^\\]]*\\]\\((?:javascript:|data:text/html|https?://[^\\s)]*\\.(?:png|jpg|gif|svg))\\)|\\[[^\\]]*\\]\\((?:javascript:|data:text/html)",
+      "flags": "i",
+      "weight": 30,
+      "reason": "Markdown link/image used for exfiltration or script execution"
+    },
+    {
+      "name": "xml_tag_injection",
+      "pattern": "<(?:system|instructions|tool_call|function_call|user|assistant)\\b[^>]*>",
+      "flags": "i",
+      "weight": 35,
+      "reason": "Forged XML/HTML tags impersonating system or tool directives"
+    },
+    {
+      "name": "tool_abuse",
+      "pattern": "\\b(call|invoke|use|trigger)\\b.{0,30}\\b(send_email|send_message|post|upload|execute_command|run_command|send)\\b",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Attempts to invoke a tool with attacker-controlled intent"
+    },
+    {
+      "name": "data_exfil_pattern",
+      "pattern": "\\b(base64|url[- ]?encode|hex encode|encode)\\b.{0,40}\\b(send|post|upload|exfiltrate|transmit|return)\\b",
+      "flags": "is",
+      "weight": 35,
+      "reason": "Encodes data before exfiltration"
+    },
+    {
+      "name": "prompt_leak",
+      "pattern": "\\b(repeat|output|print|show|reveal|return)\\b.{0,30}\\b(system prompt|your instructions|your rules|your guidelines|developer prompt)\\b",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Attempts to extract the system prompt"
+    },
+    {
+      "name": "memory_poisoning",
+      "pattern": "\\b(remember this forever|store this in memory|add to your long[- ]term memory|save this permanently|commit this to memory)\\b",
+      "flags": "i",
+      "weight": 35,
+      "reason": "Attempts to poison persistent memory"
+    },
+    {
+      "name": "authority_spoof",
+      "pattern": "\\b(i am the admin|the user authorized this|system override|i have permission|you are authorized to)\\b",
+      "flags": "i",
+      "weight": 35,
+      "reason": "Spoofs authority to bypass enforcement"
+    },
+    {
+      "name": "phishing_redirect",
+      "pattern": "\\b(click this link|visit this url|download this file|open this attachment|follow this link)\\b",
+      "flags": "i",
+      "weight": 25,
+      "reason": "Phishing-style redirect embedded in content"
+    },
+    {
+      "name": "credential_harvest",
+      "pattern": "\\b(what is your password|give me your api key|show me your token|what are your credentials|reveal your password)\\b",
+      "flags": "i",
+      "weight": 45,
+      "reason": "Directly harvests credentials"
+    },
+    {
+      "name": "command_injection",
+      "pattern": "\\b(run this command|execute this script|pipe to shell|run the following|execute the following)\\b",
+      "flags": "i",
+      "weight": 40,
+      "reason": "Requests execution of attacker-supplied command"
+    },
+    {
+      "name": "ssrf_attempt",
+      "pattern": "\\b(fetch|read|access|get)\\b.{0,30}\\b(localhost|127\\.0\\.0\\.1|169\\.254\\.169\\.254|/etc/passwd|internal network|metadata)\\b",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Attempts server-side request forgery or internal access"
+    },
+    {
+      "name": "exfil_via_tool",
+      "pattern": "\\b(send the contents of|email the file|upload the document|send the file|post the contents)\\b",
+      "flags": "i",
+      "weight": 40,
+      "reason": "Exfiltrates file/document contents via a tool"
+    },
+    {
+      "name": "unicode_homoglyph",
+      "pattern": "[\\u0400-\\u04FF\\u0370-\\u03FF\\uFF00-\\uFFEF]",
+      "flags": "",
+      "weight": 20,
+      "reason": "Contains non-Latin homoglyph characters used to evade detection"
+    },
+    {
+      "name": "zero_width_stealth",
+      "pattern": "[\\u200B\\u200C\\u200D\\uFEFF\\u2060]",
+      "flags": "",
+      "weight": 25,
+      "reason": "Contains zero-width/format characters used to hide instructions"
+    },
+    {
+      "name": "repeated_instruction",
+      "pattern": "\\b(ignore|disregard|forget|override|bypass)\\b.{0,20}\\b(ignore|disregard|forget|override|bypass)\\b",
+      "flags": "is",
+      "weight": 30,
+      "reason": "Repeated override language indicating injection pressure"
+    },
+    {
+      "name": "data_uri_exfil",
+      "pattern": "data:(?:text|application|image)/[a-z0-9+.-]+;base64,[A-Za-z0-9+/=]{40,}",
+      "flags": "i",
+      "weight": 35,
+      "reason": "Data-URI carrying a base64 payload for exfiltration"
+    },
+    {
+      "name": "tool_redirect",
+      "pattern": "\\b(send|post|upload|forward|transmit)\\b.{0,50}\\b(to|via|using)\\b.{0,30}\\b(attacker|evil|malicious|external|remote)\\b",
+      "flags": "is",
+      "weight": 40,
+      "reason": "Redirects tool output to an attacker-controlled destination"
+    },
+    {
+      "name": "session_hijack",
+      "pattern": "\\b(session token|auth cookie|session id|oauth token|refresh token)\\b.{0,40}\\b(send|post|upload|reveal|return|give)\\b",
+      "flags": "is",
+      "weight": 45,
+      "reason": "Exfiltrates session/auth material"
     }
   ],
   "compact_patterns": [
@@ -193,6 +333,48 @@
       "flags": "",
       "weight": 30,
       "reason": "Secret-exfiltration language survives obfuscation normalization"
+    },
+    {
+      "name": "compact_jailbreak",
+      "pattern": "(?:danmode|jailbreak|unfiltered|uncensored|norestrictions|unrestricted)",
+      "flags": "",
+      "weight": 35,
+      "reason": "Jailbreak framing survives normalization"
+    },
+    {
+      "name": "compact_indirect",
+      "pattern": "(?:ignorethetextabove|ignoreeverythingabove|newinstructionsfollow|disregardtheprevious)",
+      "flags": "",
+      "weight": 40,
+      "reason": "Indirect injection survives normalization"
+    },
+    {
+      "name": "compact_exfil_via_tool",
+      "pattern": "(?:sendthecontentsof|emailthefile|uploadthedocument|sendthefile)",
+      "flags": "",
+      "weight": 35,
+      "reason": "Tool-based exfiltration survives normalization"
+    },
+    {
+      "name": "compact_memory_poison",
+      "pattern": "(?:rememberthisforever|storethisinmemory|addtoyourlongtermmemory|committothismemory)",
+      "flags": "",
+      "weight": 30,
+      "reason": "Memory-poisoning survives normalization"
+    },
+    {
+      "name": "compact_credential_harvest",
+      "pattern": "(?:whatisyourpassword|givemeyourapikey|showmeyourtoken|revealyourpassword)",
+      "flags": "",
+      "weight": 40,
+      "reason": "Credential harvesting survives normalization"
+    },
+    {
+      "name": "compact_ssrf",
+      "pattern": "(?:fetchlocalhost|readetcpasswd|accessinternalnetwork|getmetadata)",
+      "flags": "",
+      "weight": 35,
+      "reason": "SSRF attempt survives normalization"
     }
   ]
 }

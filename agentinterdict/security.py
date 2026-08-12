@@ -119,6 +119,62 @@ def _decoded_escape_previews(text: str) -> list[tuple[str, str]]:
     return previews
 
 
+def _decoded_html_entity_previews(text: str) -> list[tuple[str, str]]:
+    """Bounded decode of HTML/XML entity runs (e.g. &#x69;gnore, &quot;).
+
+    Attackers hide instruction text behind numeric and named entities. Decode
+    only bounded, plausible runs to avoid CPU/memory amplification. Additive:
+    this never changes existing detection, only adds a new obfuscation layer.
+    """
+    import html as _html
+    previews: list[tuple[str, str]] = []
+    # Numeric entities: &#xNN; or &#NN; repeated, at least 6 entities in a run.
+    for match in list(re.finditer(r"(?:&#[xX]?[0-9a-fA-F]{1,6};){6,2048}", text))[:4]:
+        token = match.group(0)
+        try:
+            decoded = _html.unescape(token)
+        except Exception:
+            decoded = None
+        if decoded and _printable_utf8(decoded.encode("utf-8")):
+            previews.append(("html_entity", decoded))
+    # Named entities: &quot; &apos; &lt; &gt; &amp; &nbsp; repeated.
+    for match in list(re.finditer(r"(?:&(?:quot|apos|lt|gt|amp|nbsp|#39|#34);){6,2048}", text))[:4]:
+        token = match.group(0)
+        try:
+            decoded = _html.unescape(token)
+        except Exception:
+            decoded = None
+        if decoded and _printable_utf8(decoded.encode("utf-8")):
+            previews.append(("html_entity", decoded))
+    return previews
+
+
+def _decoded_unicode_escape_previews(text: str) -> list[tuple[str, str]]:
+    """Bounded decode of \\uXXXX / \\UXXXXXXXX escape runs used to hide text.
+
+    Additive obfuscation layer: decodes only bounded, plausible runs so a
+    hostile payload can't trigger CPU/memory amplification.
+    """
+    previews: list[tuple[str, str]] = []
+    for match in list(re.finditer(r"(?:\\u[0-9a-fA-F]{4}){4,1024}", text))[:4]:
+        token = match.group(0)
+        try:
+            decoded = token.encode("utf-8").decode("unicode_escape")
+        except Exception:
+            decoded = None
+        if decoded and _printable_utf8(decoded.encode("utf-8")):
+            previews.append(("unicode_escape", decoded))
+    for match in list(re.finditer(r"(?:\\U[0-9a-fA-F]{8}){2,512}", text))[:4]:
+        token = match.group(0)
+        try:
+            decoded = token.encode("utf-8").decode("unicode_escape")
+        except Exception:
+            decoded = None
+        if decoded and _printable_utf8(decoded.encode("utf-8")):
+            previews.append(("unicode_escape", decoded))
+    return previews
+
+
 def score_content(content: str, source_type: str) -> RiskResult:
     normalized, changed, removed_invisibles = normalize_for_scan(content)
     score = 0
@@ -158,6 +214,26 @@ def score_content(content: str, source_type: str) -> RiskResult:
                 add(f"decoded_{name}", min(weight, 30), f"Base64-decoded content: {reason}")
 
     for encoding, decoded in _decoded_escape_previews(normalized):
+        decoded_normalized, _, _ = normalize_for_scan(decoded)
+        for name, pattern, weight, reason in SIGNALS[:6]:
+            if pattern.search(decoded_normalized):
+                add(f"decoded_{encoding}_{name}", min(weight, 35), f"{encoding}-decoded content: {reason}")
+        decoded_compact = re.sub(r"[^a-z0-9]", "", decoded_normalized.lower())[:4096]
+        for name, pattern, weight, reason in COMPACT_PATTERNS:
+            if pattern.search(decoded_compact):
+                add(f"decoded_{encoding}_{name}", min(weight, 30), f"{encoding}-decoded content: {reason}")
+
+    for encoding, decoded in _decoded_html_entity_previews(normalized):
+        decoded_normalized, _, _ = normalize_for_scan(decoded)
+        for name, pattern, weight, reason in SIGNALS[:6]:
+            if pattern.search(decoded_normalized):
+                add(f"decoded_{encoding}_{name}", min(weight, 35), f"{encoding}-decoded content: {reason}")
+        decoded_compact = re.sub(r"[^a-z0-9]", "", decoded_normalized.lower())[:4096]
+        for name, pattern, weight, reason in COMPACT_PATTERNS:
+            if pattern.search(decoded_compact):
+                add(f"decoded_{encoding}_{name}", min(weight, 30), f"{encoding}-decoded content: {reason}")
+
+    for encoding, decoded in _decoded_unicode_escape_previews(normalized):
         decoded_normalized, _, _ = normalize_for_scan(decoded)
         for name, pattern, weight, reason in SIGNALS[:6]:
             if pattern.search(decoded_normalized):

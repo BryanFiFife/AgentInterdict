@@ -3,6 +3,7 @@ import json
 import os
 import sqlite3
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -33,8 +34,19 @@ def fresh(monkeypatch, tmp_path):
     db.init_db()
     yield
     db.DB_PATH = old
+    # Windows locks SQLite files while any connection is open. Tests open raw
+    # sqlite3.connect(TEST_DB) connections that the `with` block commits but
+    # does not close, so force GC and retry the unlink before giving up.
     if TEST_DB.exists():
-        TEST_DB.unlink()
+        import gc
+        gc.collect()
+        for _ in range(5):
+            try:
+                TEST_DB.unlink()
+                break
+            except PermissionError:
+                gc.collect()
+                time.sleep(0.1)
 
 
 def ingest_text(content="normal memory", **overrides):
@@ -247,8 +259,14 @@ def test_malformed_signed_license_timestamp_fails_closed(tmp_path, monkeypatch):
     assert status.plan == "community"
 
 
-def test_oversized_license_token_fails_closed(monkeypatch):
-    monkeypatch.setenv("AGENTINTERDICT_LICENSE_TOKEN", "x" * 40_000)
+def test_oversized_license_token_fails_closed(monkeypatch, tmp_path):
+    # Windows caps env vars at 32767 chars, so a 40k token can't be set via
+    # monkeypatch.setenv. Write it to a license file instead (the code reads
+    # AGENTINTERDICT_LICENSE_FILE and fails closed on oversized files).
+    lic_file = tmp_path / "oversized.mglic"
+    lic_file.write_text("x" * 40_000, encoding="utf-8")
+    monkeypatch.delenv("AGENTINTERDICT_LICENSE_TOKEN", raising=False)
+    monkeypatch.setenv("AGENTINTERDICT_LICENSE_FILE", str(lic_file))
     status = licensing.get_license_status()
     assert status.valid is False
     assert status.plan == "community"

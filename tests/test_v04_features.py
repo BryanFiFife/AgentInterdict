@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 import sqlite3
+import time
+import gc
 import pytest
 
 TEST_DB = Path(__file__).parent / "v04-test.db"
@@ -17,7 +19,18 @@ def fresh():
     db.DB_PATH = TEST_DB
     db.init_db()
     yield
-    if TEST_DB.exists(): TEST_DB.unlink()
+    # Windows locks SQLite files while any connection is open. Tests open raw
+    # sqlite3.connect(TEST_DB) connections that the `with` block commits but
+    # does not close, so force GC and retry the unlink before giving up.
+    if TEST_DB.exists():
+        gc.collect()
+        for _ in range(5):
+            try:
+                TEST_DB.unlink()
+                break
+            except PermissionError:
+                gc.collect()
+                time.sleep(0.1)
 
 
 def ingest(content, source="web", ns="x", **kw):

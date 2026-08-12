@@ -14,7 +14,7 @@ AgentInterdict sits at the runtime boundary of your autonomous agent. It **binds
 [![CI](https://img.shields.io/github/actions/workflow/status/BryanFiFife/AgentInterdict/ci.yml?style=for-the-badge&label=CI&logo=github)](https://github.com/BryanFiFife/AgentInterdict/actions)
 [![Stars](https://img.shields.io/github/stars/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github&color=gold)](https://github.com/BryanFiFife/AgentInterdict)
 [![Forks](https://img.shields.io/github/forks/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github)](https://github.com/BryanFiFife/AgentInterdict)
-[![Tests](https://img.shields.io/badge/tests-78%20passing-2ea44f?style=for-the-badge)](#)
+[![Tests](https://img.shields.io/badge/tests-116%20passing-2ea44f?style=for-the-badge)](#)
 [![LOC](https://img.shields.io/badge/core-2.7k%20LOC-4f8cff?style=for-the-badge)](#)
 [![Live Site](https://img.shields.io/badge/Live%20Site-agentinterdict.pages.dev-5E8BFF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://agentinterdict.pages.dev/)
 
@@ -56,6 +56,7 @@ AgentInterdict is a **local, transparent runtime** that sits between your agent 
 | ⚡ **Action-time re-scoring** | The actual recalled bundle is re-scored *before* a tool action. |
 | 🔑 **Credentials-not-memory** | Private keys, API tokens, JWTs and credential assignments are **rejected before persistence**. |
 | 🧱 **Fail-closed tampering** | Direct DB tampering is detected; runtime flips to `lockdown`. |
+| 🧾 **Code-change review gate** *(optional)* | Scan an AI-generated code diff with the same engine and record a signed, tamper-evident evidence verdict. Govern the code your agent *writes*, not just what it reads. |
 
 **Honest scope:** AgentInterdict reduces and contains persistent-memory risk. It does not make prompt injection impossible and is not a substitute for host permissions, least-trust, sandboxing, or independent human approval for high-impact actions.
 
@@ -145,6 +146,9 @@ The 7 misses are documented with payloads in the benchmark script so you can rep
 |---|---|---|---|---|
 | Core enforcement tests | 78 | 0 | 1 | ✅ passing |
 | Tamper / fail-closed tests | 9 | 0 | 0 | ✅ passing |
+| Threat-expansion smoke tests | 32 | 0 | 0 | ✅ passing |
+| Code-change review gate | 5 | 0 | 0 | ✅ passing |
+| **Total** | **116** | **0** | **1** | ✅ passing |
 
 Run the full suite yourself with `pytest tests`. The enforcement invariants (origin-bound authority, no derivation amplification, retrieval ≠ permission, action-time re-scoring, credentials-not-memory, fail-closed tampering) are exercised by these tests.
 
@@ -189,6 +193,7 @@ POST /api/v1/scan          # inspect a candidate without persisting
 POST /api/v1/memories      # write a memory through the gate
 POST /api/v1/search        # guarded retrieval
 POST /api/v1/action-check  # action-time firewall
+POST /api/v1/code-change   # optional: review an AI-generated code diff + record evidence
 GET  /api/v1/stats         # gateway statistics
 ```
 

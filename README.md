@@ -16,6 +16,7 @@ AgentInterdict sits at the runtime boundary of your autonomous agent. It **binds
 [![Forks](https://img.shields.io/github/forks/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github)](https://github.com/BryanFiFife/AgentInterdict)
 [![Tests](https://img.shields.io/badge/tests-78%20passing-2ea44f?style=for-the-badge)](#)
 [![LOC](https://img.shields.io/badge/core-2.7k%20LOC-4f8cff?style=for-the-badge)](#)
+[![Live Site](https://img.shields.io/badge/Live%20Site-agentinterdict.pages.dev-5E8BFF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://agentinterdict.pages.dev/)
 
 **Local-first · Fail-closed · Transparent & auditable**
 

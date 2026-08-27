@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="assets/branding/agentinterdict-logo.png" alt="AgentInterdict" width="170" />
-
 # 🛡️ AgentInterdict
 
 ### Runtime enforcement for autonomous AI agents

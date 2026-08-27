@@ -4,7 +4,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     AGENTINTERDICT_DB=/data/agentinterdict.db \
     AGENTINTERDICT_BACKUP_DIR=/data/backups \
-    AGENTINTERDICT_PORT=43847
+    AGENTINTERDICT_PORT=43847 \
+    AGENTINTERDICT_HOST=0.0.0.0
 
 WORKDIR /app
 COPY requirements.txt requirements-tested.txt ./

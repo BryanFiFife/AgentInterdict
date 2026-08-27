@@ -253,7 +253,7 @@ CATEGORIES = [
 ]
 
 
-def main() -> None:
+def main() -> int:
     total = 0
     blocked = 0
     print(f"AgentInterdict injection benchmark — threshold={THRESHOLD}\n")
@@ -274,12 +274,17 @@ def main() -> None:
         total += c_total
         blocked += c_blocked
         print(f"{cat:<22}{c_total:>9}{c_blocked:>9}{c_missed:>9}{rate:>7.1f}%")
+    final_rate = blocked / total * 100
     print("-" * 58)
-    print(f"{'TOTAL':<22}{total:>9}{blocked:>9}{total-blocked:>9}{blocked/total*100:>7.1f}%")
+    print(f"{'TOTAL':<22}{total:>9}{blocked:>9}{total-blocked:>9}{final_rate:>7.1f}%")
     print(f"\nMissed {total-blocked} of {total} (documented below for reproducibility):")
     for cat, score, snippet in misses:
         print(f"  [{cat}] score={score}: {snippet}")
+    if final_rate < 96.5:
+        print(f"\nFAIL: benchmark regressed below the v0.6 release floor: {final_rate:.1f}% < 96.5%")
+        return 2
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -13,6 +13,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from agentinterdict.version import VERSION
 DEFAULT_PORTS = [43847, 43853, 43909, 45137, 47321, 49157]
 CORE_IMPORTS = ["fastapi", "uvicorn", "pydantic", "httpx", "cryptography"]
 SECURE_RUNTIME_BOUNDS = {
@@ -286,7 +288,7 @@ def main() -> int:
 
     state = {
         "installed": True,
-        "version": "0.4.0",
+        "version": VERSION,
         "root": str(ROOT),
         "dashboard": f"http://127.0.0.1:{port}",
         "api_docs": f"http://127.0.0.1:{port}/docs",

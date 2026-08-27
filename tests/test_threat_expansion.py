@@ -150,4 +150,4 @@ def test_benchmark_block_rate_does_not_regress():
     all_payloads = DIRECT + OBFUSCATED + MULTITURN + TOOLCALL
     blocked = sum(1 for p in all_payloads if score_content(p, "document").score >= 45)
     rate = blocked / len(all_payloads) * 100
-    assert rate >= 96.0, f"block rate regressed to {rate:.1f}%"
+    assert rate >= 96.5, f"block rate regressed to {rate:.1f}%"

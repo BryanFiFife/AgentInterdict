@@ -172,6 +172,19 @@ def verify_license_token(token: str, *, source: str = "provided-token", installa
         return _community(source, "Invalid license claims")
 
 
+def get_entitlement_token() -> str | None:
+    """Return the locally installed signed entitlement token, if it is bounded.
+
+    Callers must still verify the token with get_license_status()/verify_license_token
+    before trusting any claims. This accessor exists so authenticated control-plane
+    requests can present the same signed lease without duplicating file/env logic.
+    """
+    token, _source = _read_token()
+    if not token or len(token.encode("utf-8", errors="ignore")) > MAX_TOKEN_BYTES:
+        return None
+    return token
+
+
 def get_license_status() -> LicenseStatus:
     token, source = _read_token()
     if not token:

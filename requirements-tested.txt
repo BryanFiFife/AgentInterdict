@@ -1,9 +1,10 @@
-# Release-pinned direct/transitive security baseline. The installer must not fall back to a runtime below the secure minimums checked by scripts/self_install.py.
-fastapi==0.128.2
+# Release-pinned runtime used by Docker and the self-installer.
+# CI also tests the supported dependency ranges separately to catch forward-compatibility regressions.
+fastapi==0.141.1
 starlette==0.50.0
-uvicorn[standard]==0.48.0
+uvicorn[standard]==0.52.4
 h11==0.16.0
 pydantic==2.13.4
 httpx==0.28.1
-cryptography==50.0.0
+cryptography==50.0.1
 packaging==25.0

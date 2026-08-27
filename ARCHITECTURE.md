@@ -1,4 +1,4 @@
-# AgentInterdict v0.4 architecture
+# AgentInterdict v0.6 architecture
 
 ## Core invariants
 

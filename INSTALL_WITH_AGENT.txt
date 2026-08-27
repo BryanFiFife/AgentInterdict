@@ -1,4 +1,4 @@
-AGENTINTERDICT v0.4 — SELF-INSTALL PROMPT
+AGENTINTERDICT v0.6 - SELF-INSTALL PROMPT
 
 Copy the prompt below to Hermes, OpenClaw, Claude Code, Codex, or another capable coding/automation agent.
 Replace <AGENTINTERDICT_DIR> with the absolute directory containing this file.

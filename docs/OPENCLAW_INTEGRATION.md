@@ -24,7 +24,7 @@ This writes:
 
 with the actual AgentInterdict root and virtual-environment Python path substituted into the skill.
 
-The skill calls `scripts/interdict.py` for lightweight health, scan, secure store, guarded recall and the v0.4 pre-action firewall. Deep integrity/audit operations are intentionally not exposed to the runtime OpenClaw agent and remain operator-only. This avoids assuming a particular OpenClaw MCP implementation while preserving least privilege.
+The skill calls `scripts/interdict.py` for lightweight health, scan, secure store, guarded recall and the v0.6 pre-action firewall. Deep integrity/audit operations are intentionally not exposed to the runtime OpenClaw agent and remain operator-only. This avoids assuming a particular OpenClaw MCP implementation while preserving least privilege.
 
 ## Tool policy
 

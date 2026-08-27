@@ -25,7 +25,7 @@ def teardown_function():
 
 def test_gui_and_system_endpoints():
     with TestClient(app) as c:
-        assert c.get('/health').json()['version'] == '0.4.0'
+        assert c.get('/health').json()['version'] == '0.6.0'
         sys = c.get('/api/v1/system').json()
         assert sys['port'] == 43847
         html = c.get('/').text

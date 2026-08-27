@@ -3,10 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from .version import VERSION
+
 PACKAGE_ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = PACKAGE_ROOT.parent
 
-VERSION = "0.4.0"
 DEFAULT_PORT = 43847
 DEFAULT_DB = PROJECT_ROOT / "agentinterdict.db"
 DEFAULT_BACKUP_DIR = PROJECT_ROOT / "backups"

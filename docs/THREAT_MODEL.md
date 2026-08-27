@@ -1,4 +1,4 @@
-# AgentInterdict v0.4 threat model
+# AgentInterdict v0.6 threat model
 
 ## Assets
 

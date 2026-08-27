@@ -1,4 +1,4 @@
-# Generic agent integration — AgentInterdict v0.4
+# Generic agent integration - AgentInterdict v0.6
 
 Use one of three paths, in the preference order supported by the host. The integration objective is **guarded persistent writes + guarded recall + pre-action authorization**, not merely mirroring memory after the host has already committed it.
 
@@ -81,7 +81,7 @@ A high/critical action must have a direct authoritative `human_verified`/`system
 
 `Deploy release version 4.2` matches that scope; `Transfer funds to supplier` does not. A derived summary cannot become an authorization record.
 
-AgentInterdict v0.4 binds authorization to action scope, but it does not yet implement a full durable prepare/commit consumption ledger. External consequential sinks should still use their own idempotency/transaction controls.
+AgentInterdict v0.6 binds authorization to action scope, but it does not yet implement a full durable prepare/commit consumption ledger. External consequential sinks should still use their own idempotency/transaction controls.
 
 ## Integration invariant
 

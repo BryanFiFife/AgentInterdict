@@ -22,7 +22,7 @@ Bundled path:
 integrations/hermes/agentinterdict/
 ```
 
-Install/register it using the Hermes memory-provider mechanism for the version you run. The adapter sends candidates and recall requests through AgentInterdict and exposes the v0.4 pre-action check for consequential tool use.
+Install/register it using the Hermes memory-provider mechanism for the version you run. The adapter sends candidates and recall requests through AgentInterdict and exposes the v0.6 pre-action check for consequential tool use.
 
 ## 3. MCP option
 

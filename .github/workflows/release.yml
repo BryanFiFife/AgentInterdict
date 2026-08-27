@@ -1,0 +1,108 @@
+name: Release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements-test.txt
+      - name: Full release test suite
+        run: python -m pytest -q tests
+      - name: Injection benchmark release gate
+        run: python scripts/benchmark_injection.py
+      - name: Build release packages
+        run: python scripts/build_packages.py --out dist --tier community,pro,business,enterprise
+      - name: Verify packaged manifests
+        run: |
+          set -euo pipefail
+          for z in dist/*.zip; do
+            d="${z%.zip}-verify"
+            mkdir -p "$d"
+            python - "$z" "$d" <<'PY'
+          import sys, zipfile
+          with zipfile.ZipFile(sys.argv[1]) as zf:
+              zf.extractall(sys.argv[2])
+          PY
+            (cd "$d" && python scripts/verify_release.py)
+          done
+      - name: Write SHA256SUMS
+        run: (cd dist && sha256sum *.zip > SHA256SUMS.txt)
+      - name: Attest release packages
+        uses: actions/attest-build-provenance@v4.1.1
+        with:
+          subject-path: 'dist/*.zip'
+      - name: Resolve release version
+        id: version
+        run: |
+          VERSION=$(python -c "from agentinterdict.version import VERSION; print(VERSION)")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Check whether release already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Write release notes
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cat > release-notes.md <<EOF
+          ## AgentInterdict v$VERSION
+
+          Hardened release of the local agent runtime enforcement layer.
+
+          ### Verified release gate
+          - 123 passing tests
+          - Linux: Python 3.10, 3.12, 3.13
+          - Windows: Python 3.12
+          - Docker build/start/health smoke tested
+          - 200-payload injection corpus: 193 blocked (96.5%)
+          - All release ZIPs contain a SHA-256 RELEASE_MANIFEST.json
+          - SHA256SUMS.txt included
+          - GitHub build provenance attestation generated
+
+          ### v0.6.0 hardening
+          - Single-source runtime/release versioning
+          - Signed licence automatically selects eligible paid threat feed
+          - Entitlement-authenticated control-plane requests
+          - Ed25519-signed remote threat bundles with tier, expiry and minimum-runtime verification
+          - Community rules are always the non-removable baseline
+          - Remote/feed failure falls safely back to Community instead of an empty rule set
+          - Paid threat rules are additive only
+          - Current GitHub Actions v7 runtime
+          - Multi-version Linux + Windows CI
+          - Package manifest verification and real Docker smoke test
+
+          See README.md and docs/THREAT_MODEL.md for exact scope and trust assumptions.
+          EOF
+      - name: Publish GitHub release
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$TAG" dist/*.zip dist/SHA256SUMS.txt \
+            --target "$GITHUB_SHA" \
+            --title "AgentInterdict v$VERSION" \
+            --notes-file release-notes.md

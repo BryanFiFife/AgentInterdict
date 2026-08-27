@@ -6,12 +6,71 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: '3.10'
+          - os: ubuntu-latest
+            python: '3.12'
+          - os: ubuntu-latest
+            python: '3.13'
+          - os: windows-latest
+            python: '3.12'
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
+          cache: pip
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements-test.txt
       - run: python -m pytest -q tests
+
+  package-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-test.txt
+      - run: python scripts/build_packages.py --out dist --tier community,pro,business,enterprise
+      - name: Verify every packaged manifest
+        run: |
+          set -euo pipefail
+          for z in dist/*.zip; do
+            d="${z%.zip}-verify"
+            mkdir -p "$d"
+            python - "$z" "$d" <<'PY'
+          import sys, zipfile
+          with zipfile.ZipFile(sys.argv[1]) as zf:
+              zf.extractall(sys.argv[2])
+          PY
+            (cd "$d" && python scripts/verify_release.py)
+          done
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build image
+        run: docker build -t agentinterdict:ci .
+      - name: Start hardened container and check health
+        run: |
+          docker run -d --name agentinterdict-ci \
+            -e AGENTINTERDICT_SECRET=ci-signing-secret-0123456789abcdef0123456789abcdef \
+            -e AGENTINTERDICT_OPERATOR_KEY=ci-operator-key-0123456789abcdef0123456789abcdef \
+            -e AGENTINTERDICT_API_KEY=ci-runtime-api-key-0123456789abcdef0123456789abcdef \
+            -p 127.0.0.1:43847:43847 agentinterdict:ci
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:43847/health > /tmp/health.json; then cat /tmp/health.json; exit 0; fi
+            sleep 1
+          done
+          docker logs agentinterdict-ci
+          exit 1
+      - if: always()
+        run: docker rm -f agentinterdict-ci || true

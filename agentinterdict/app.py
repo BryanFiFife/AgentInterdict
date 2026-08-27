@@ -13,7 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import config, db, service
+from . import config, db, service, threats
 from .errors import ConflictError, IntegrityError, AgentInterdictError, StorageBusyError, StorageCorruptionError, StorageError, ValidationError
 from .licensing import get_license_status
 from .models import ActionCheckRequest, CodeChangeRequest, IngestRequest, PromoteRequest, ReviewRequest, ReviseRequest, RuntimeModeRequest, ScanRequest, SearchRequest
@@ -204,6 +204,7 @@ def system_status():
         "remote_bind_without_api_key": config.is_remote_bind() and not bool(config.api_key()),
         "runtime_mode": service.runtime_mode(),
         "license": get_license_status().as_dict(),
+        "threat_feed": threats.THREAT_STATUS,
     }
 
 

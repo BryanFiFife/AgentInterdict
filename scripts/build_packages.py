@@ -37,10 +37,28 @@ def _should_include(rel: str) -> bool:
     return True
 
 
-def _collect_files() -> list[tuple[str, Path]]:
+def _collect_files(exclude_roots: list[Path] | None = None) -> list[tuple[str, Path]]:
+    """Collect release source files while excluding the active build output tree.
+
+    This must be path-based rather than name-based: callers are allowed to build
+    into ROOT/dist, ROOT/releases, or any other directory without recursively
+    packaging artifacts produced earlier in the same run.
+    """
+    excluded = [p.expanduser().resolve() for p in (exclude_roots or [])]
+
+    def excluded_path(path: Path) -> bool:
+        resolved = path.resolve()
+        for root in excluded:
+            try:
+                resolved.relative_to(root)
+                return True
+            except ValueError:
+                continue
+        return False
+
     out = []
     for path in sorted(ROOT.rglob("*")):
-        if path.is_file():
+        if path.is_file() and not excluded_path(path):
             rel = path.relative_to(ROOT).as_posix()
             if _should_include(rel):
                 out.append((rel, path))
@@ -99,11 +117,14 @@ def _write_manifest(tmp: Path, tier: str) -> None:
 def build_package(tier: str, out_dir: Path) -> Path:
     if tier not in TIERS:
         raise ValueError(f"unknown tier: {tier}")
+    out_dir = out_dir.expanduser().resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
     tmp = out_dir / f"agentinterdict-{tier}-tmp"
     if tmp.exists():
         shutil.rmtree(tmp)
     tmp.mkdir(parents=True, exist_ok=True)
-    for rel, src in _collect_files():
+    source_files = _collect_files([out_dir])
+    for rel, src in source_files:
         dest = tmp / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dest)

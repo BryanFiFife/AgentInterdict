@@ -10,7 +10,7 @@ os.environ.pop("AGENTINTERDICT_API_KEY", None)
 
 from fastapi.testclient import TestClient
 from agentinterdict.app import app
-from agentinterdict import db
+from agentinterdict import db, config
 
 
 def setup_function():
@@ -25,7 +25,7 @@ def teardown_function():
 
 def test_gui_and_system_endpoints():
     with TestClient(app) as c:
-        assert c.get('/health').json()['version'] == '0.6.0'
+        assert c.get('/health').json()['version'] == config.VERSION
         sys = c.get('/api/v1/system').json()
         assert sys['port'] == 43847
         html = c.get('/').text

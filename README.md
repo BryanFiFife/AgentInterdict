@@ -8,7 +8,7 @@
 
 [![Release](https://img.shields.io/github/v/release/BryanFiFife/AgentInterdict?style=for-the-badge&logo=github&label=release)](https://github.com/BryanFiFife/AgentInterdict/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/BryanFiFife/AgentInterdict/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/BryanFiFife/AgentInterdict/actions)
-[![Tests](https://img.shields.io/badge/tests-123%20passing-2ea44f?style=for-the-badge&logo=pytest&logoColor=white)](#verified)
+[![Tests](https://img.shields.io/badge/tests-124%20passing-2ea44f?style=for-the-badge&logo=pytest&logoColor=white)](#verified)
 [![Benchmark](https://img.shields.io/badge/injection%20benchmark-96.5%25-2ea44f?style=for-the-badge&logo=target&logoColor=white)](#injection-benchmark)
 
 [![Python](https://img.shields.io/badge/Python-3.10--3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -39,11 +39,11 @@ AgentInterdict sits between **context and consequence**. It does not try to make
 
 ---
 
-## v0.6.0 hardening release
+## v0.6.1 hardening release
 
-v0.6.0 closes the release and commercial-path gaps identified during a full repository audit.
+v0.6.1 contains the v0.6 hardening work plus a packaging isolation fix that prevents build outputs from ever being re-ingested into later tier archives.
 
-| Area | v0.6.0 |
+| Area | v0.6.1 |
 |---|---|
 | Runtime versioning | One canonical version source across API, installer and MCP |
 | Community threat rules | Always loaded as the non-removable baseline |
@@ -52,10 +52,10 @@ v0.6.0 closes the release and commercial-path gaps identified during a full repo
 | Paid feed authenticity | Ed25519 signature, tier, expiry and minimum-runtime verification |
 | Remote failure | Safe fallback to the complete Community baseline, never an empty detector |
 | Feed semantics | Paid rules are additive and cannot replace/weaken baked-in Community signals |
-| Package integrity | Every ZIP carries a SHA-256 `RELEASE_MANIFEST.json` |
+| Package integrity | Every ZIP carries a SHA-256 `RELEASE_MANIFEST.json`; build output directories are excluded by resolved path to prevent recursive artifact nesting |
 | Release provenance | GitHub build provenance attestation + `SHA256SUMS.txt` |
 | CI | Linux 3.10/3.12/3.13 + Windows 3.12 + package smoke + live Docker smoke |
-| Current suite | **123 passing tests** |
+| Current suite | **124 passing tests** |
 | Injection benchmark | **193 / 200 blocked (96.5%)** on the published fixed corpus |
 
 ---
@@ -218,7 +218,7 @@ The remote bundle is expected to carry an Ed25519 `signature` over canonical JSO
 
 The open-source runtime currently implements and tests **local enforcement, licensing, authenticated signed threat-feed overlays, REST, MCP, Hermes/OpenClaw adapters, audit/integrity, incident response and package verification**.
 
-Entitlement names for hosted classifier, organisational RBAC, SSO/SAML, SIEM or other hosted control-plane services should **not** be interpreted as implementations inside this repository. Those capabilities require separate control-plane components and are not claimed as part of the v0.6.0 local runtime test result.
+Entitlement names for hosted classifier, organisational RBAC, SSO/SAML, SIEM or other hosted control-plane services should **not** be interpreted as implementations inside this repository. Those capabilities require separate control-plane components and are not claimed as part of the v0.6.1 local runtime test result.
 
 ---
 
@@ -235,7 +235,7 @@ The CI gate runs the complete test suite on:
 - package build/extract/manifest verification for all four release tiers
 - Docker image build + real container startup + `/health` probe
 
-**Current result: 123 passed.**
+**Current result: 124 passed.**
 
 The suite covers origin authority, derivation, action scoping, compositional poisoning, credential rejection, Unicode/encoded evasion, tampering, HMAC audit integrity, runtime modes, contamination containment, idempotency semantics, migration atomicity, concurrency, licensing, signed remote feed validation, release manifests and API enforcement.
 

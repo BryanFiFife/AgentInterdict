@@ -72,7 +72,7 @@ jobs:
           Hardened release of the local agent runtime enforcement layer.
 
           ### Verified release gate
-          - 123 passing tests
+          - 124 passing tests
           - Linux: Python 3.10, 3.12, 3.13
           - Windows: Python 3.12
           - Docker build/start/health smoke tested
@@ -81,7 +81,7 @@ jobs:
           - SHA256SUMS.txt included
           - GitHub build provenance attestation generated
 
-          ### v0.6.0 hardening
+          ### v0.6.x hardening
           - Single-source runtime/release versioning
           - Signed licence automatically selects eligible paid threat feed
           - Entitlement-authenticated control-plane requests
@@ -92,6 +92,7 @@ jobs:
           - Current GitHub Actions v7 runtime
           - Multi-version Linux + Windows CI
           - Package manifest verification and real Docker smoke test
+          - Build output isolation prevents recursive ZIP nesting across tier artifacts
 
           See README.md and docs/THREAT_MODEL.md for exact scope and trust assumptions.
           EOF

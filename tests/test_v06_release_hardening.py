@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -33,8 +34,8 @@ def _signed_feed(private: Ed25519PrivateKey, *, tier: str = "pro", expires_delta
     return payload
 
 
-def test_release_version_is_single_source_v060():
-    assert config.VERSION == "0.6.0"
+def test_release_version_is_single_source_v061():
+    assert config.VERSION == "0.6.1"
     import agentinterdict
     assert agentinterdict.__version__ == config.VERSION
 
@@ -106,7 +107,7 @@ def test_release_package_contains_manifest_and_verifies(tmp_path):
     with zipfile.ZipFile(archive) as zf:
         zf.extractall(extracted)
     manifest = json.loads((extracted / "RELEASE_MANIFEST.json").read_text(encoding="utf-8"))
-    assert manifest["version"] == "0.6.0"
+    assert manifest["version"] == "0.6.1"
     assert manifest["tier"] == "pro"
     assert "agentinterdict/threats/community.json" in manifest["files"]
     # Paid builds no longer replace the baseline with a fail-open remote stub.
@@ -114,3 +115,18 @@ def test_release_package_contains_manifest_and_verifies(tmp_path):
     result = subprocess.run([sys.executable, "scripts/verify_release.py"], cwd=extracted, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
     assert "OK: verified" in result.stdout
+
+
+def test_multi_tier_build_inside_repo_never_nests_prior_archives():
+    out = build_packages.ROOT / ".agentinterdict-package-recursion-test"
+    shutil.rmtree(out, ignore_errors=True)
+    try:
+        archives = [build_packages.build_package(tier, out) for tier in ("community", "pro", "business", "enterprise")]
+        assert len(archives) == 4
+        for archive in archives:
+            with zipfile.ZipFile(archive) as zf:
+                names = zf.namelist()
+            assert not any(name.lower().endswith(".zip") for name in names), f"{archive.name} recursively contains another ZIP"
+            assert not any(".agentinterdict-package-recursion-test" in name for name in names)
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
